@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="520" viewBox="0 0 1400 520" role="img" aria-label="Abstract fantasy map texture">
+  <defs>
+    <linearGradient id="sky" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#26374d"/>
+      <stop offset="0.48" stop-color="#2a2230"/>
+      <stop offset="1" stop-color="#17231d"/>
+    </linearGradient>
+    <filter id="soft">
+      <feGaussianBlur stdDeviation="7"/>
+    </filter>
+  </defs>
+  <rect width="1400" height="520" fill="url(#sky)"/>
+  <path d="M0 338 C128 298 210 354 320 308 C475 244 536 284 690 246 C862 204 952 282 1082 222 C1224 157 1298 171 1400 118 L1400 520 L0 520 Z" fill="#273923" opacity="0.64"/>
+  <path d="M0 410 C130 360 218 408 360 368 C510 325 622 382 788 318 C918 268 1010 350 1130 292 C1258 230 1328 250 1400 214 L1400 520 L0 520 Z" fill="#171b20" opacity="0.75"/>
+  <path d="M144 80 C218 24 338 42 404 112 C482 196 570 148 650 96 C738 38 842 66 900 132 C978 222 1098 184 1196 120 C1274 70 1352 88 1400 126" fill="none" stroke="#d8a64a" stroke-width="3" opacity="0.22"/>
+  <path d="M120 182 C250 140 340 224 468 178 C604 129 716 212 842 164 C976 112 1114 210 1288 148" fill="none" stroke="#f0c36a" stroke-width="2" opacity="0.16"/>
+  <circle cx="1170" cy="108" r="82" fill="#d8a64a" opacity="0.16" filter="url(#soft)"/>
+  <circle cx="1060" cy="170" r="54" fill="#3da5d9" opacity="0.15" filter="url(#soft)"/>
+  <path d="M700 84 L732 146 L800 156 L750 202 L762 270 L700 238 L638 270 L650 202 L600 156 L668 146 Z" fill="#d8a64a" opacity="0.14"/>
+  <g fill="none" stroke="#f6efe5" stroke-width="1.3" opacity="0.12">
+    <path d="M58 96 h176"/>
+    <path d="M96 132 h102"/>
+    <path d="M1128 342 h180"/>
+    <path d="M1174 376 h90"/>
+    <circle cx="314" cy="394" r="38"/>
+    <circle cx="314" cy="394" r="62"/>
+  </g>
+</svg>

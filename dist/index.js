@@ -252,6 +252,19 @@ const escapeHtml = (value) => String(value !== null && value !== void 0 ? value 
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
 const formatNumber = (value, digits = 0) => typeof value === "number" && Number.isFinite(value) ? value.toFixed(digits) : "n/a";
+const getSearchQuery = () => state.search.trim().toLowerCase();
+const textMatchesSearch = (...values) => {
+    const query = getSearchQuery();
+    if (!query) {
+        return true;
+    }
+    return values
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+        .includes(query);
+};
+const getSearchDimClass = (matches) => (getSearchQuery() && !matches ? " search-dimmed" : "");
 const normalizeItemName = (name) => name.toLowerCase().replace(/\s+/g, " ").trim();
 const normalizeEnchantKey = (name) => normalizeItemName(name)
     .replace(/'/g, "")
@@ -259,6 +272,18 @@ const normalizeEnchantKey = (name) => normalizeItemName(name)
     .replace(/[^a-z0-9]+/g, "_")
     .replace(/^_+|_+$/g, "");
 const formatQuality = (quality) => (quality ? `Q${quality}` : "");
+const renderPreservingTableScroll = () => {
+    var _a, _b;
+    const tableScroll = document.querySelector(".table-scroll");
+    const scrollLeft = (_a = tableScroll === null || tableScroll === void 0 ? void 0 : tableScroll.scrollLeft) !== null && _a !== void 0 ? _a : 0;
+    const scrollTop = (_b = tableScroll === null || tableScroll === void 0 ? void 0 : tableScroll.scrollTop) !== null && _b !== void 0 ? _b : 0;
+    render();
+    const nextTableScroll = document.querySelector(".table-scroll");
+    if (nextTableScroll) {
+        nextTableScroll.scrollLeft = scrollLeft;
+        nextTableScroll.scrollTop = scrollTop;
+    }
+};
 const getItemKey = (playerName, slotKey) => `${playerName}::${slotKey}`;
 const normalizePlayer = (player) => {
     var _a;
@@ -468,16 +493,18 @@ const getItemTags = (item) => {
     };
 };
 const renderSlotCell = (record, slot) => {
-    var _a, _b, _c, _d;
+    var _a, _b, _c, _d, _e, _f;
     const item = (_c = (_b = (_a = record.data) === null || _a === void 0 ? void 0 : _a.gear) === null || _b === void 0 ? void 0 : _b.items) === null || _c === void 0 ? void 0 : _c[slot.key];
+    const slotMatchesSearch = textMatchesSearch(slot.label, item === null || item === void 0 ? void 0 : item.name, item === null || item === void 0 ? void 0 : item.item_level, (_d = item === null || item === void 0 ? void 0 : item.enchants_detail) === null || _d === void 0 ? void 0 : _d.map((enchant) => enchant.name).join(" "), (_e = item === null || item === void 0 ? void 0 : item.gems_detail) === null || _e === void 0 ? void 0 : _e.map((gem) => gem.name).join(" "));
+    const slotClass = `slot-cell${getSearchDimClass(slotMatchesSearch)}`;
     if (record.status === "loading" || record.status === "idle") {
-        return `<td class="slot-cell"><span class="muted">Loading</span></td>`;
+        return `<td class="${slotClass}"><span class="muted">Loading</span></td>`;
     }
     if (record.status === "error") {
-        return `<td class="slot-cell"><span class="error-text">${escapeHtml(record.error)}</span></td>`;
+        return `<td class="${slotClass}"><span class="error-text">${escapeHtml(record.error)}</span></td>`;
     }
     if (!item) {
-        return `<td class="slot-cell"><span class="muted">Empty</span></td>`;
+        return `<td class="${slotClass}"><span class="muted">Empty</span></td>`;
     }
     const tags = getItemTags(item);
     const canHaveEnchant = canCheckEnchant(record, slot);
@@ -485,9 +512,9 @@ const renderSlotCell = (record, slot) => {
     const track = getTrackInfo(item);
     const trackText = formatTrack(track) || getAmbiguousTrackText(item);
     return `
-    <td class="slot-cell">
+    <td class="${slotClass}">
       <button class="item-button" type="button" data-item-key="${escapeHtml(getItemKey(record.player.name, slot.key))}">
-        <strong class="${track ? `item-name item-name--${track.track.toLowerCase()}` : "item-name"}">${escapeHtml((_d = item.name) !== null && _d !== void 0 ? _d : "Unknown item")}</strong>
+        <strong class="${track ? `item-name item-name--${track.track.toLowerCase()}` : "item-name"}">${escapeHtml((_f = item.name) !== null && _f !== void 0 ? _f : "Unknown item")}</strong>
       </button>
       <span class="item-level">ilvl ${formatNumber(item.item_level)}</span>
       <div class="item-tags">
@@ -524,24 +551,26 @@ const renderItemModal = () => {
   `;
 };
 const renderRecordRow = (record) => {
-    var _a, _b, _c, _d;
+    var _a, _b, _c, _d, _e, _f, _g;
     const characterName = getCharacterName(record);
     const thumbnail = (_a = record.data) === null || _a === void 0 ? void 0 : _a.thumbnail_url;
+    const playerMatchesSearch = textMatchesSearch(characterName, record.player.name, getCharacterRealm(record), (_b = record.data) === null || _b === void 0 ? void 0 : _b.faction, (_c = record.data) === null || _c === void 0 ? void 0 : _c.active_spec_name, (_d = record.data) === null || _d === void 0 ? void 0 : _d.class);
+    const issueMatchesSearch = textMatchesSearch(getIssueCount(record), "issues");
     return `
     <tr>
-      <td class="sticky-cell sticky-cell--player">
+      <td class="sticky-cell sticky-cell--player${getSearchDimClass(playerMatchesSearch)}">
         <div class="player-cell">
           ${thumbnail
         ? `<img class="avatar avatar--image" src="${escapeHtml(thumbnail)}" alt="" />`
         : `<span class="avatar" aria-hidden="true">${escapeHtml(getInitials(characterName))}</span>`}
           <div>
             <a class="armory-link" href="${escapeHtml(record.player.blizzardUrl)}" target="_blank" rel="noreferrer">${escapeHtml(characterName)}</a>
-            <span>${escapeHtml([(_b = record.data) === null || _b === void 0 ? void 0 : _b.active_spec_name, (_c = record.data) === null || _c === void 0 ? void 0 : _c.class].filter(Boolean).join(" ") || getStatusLabel(record))}</span>
-            <span>${escapeHtml([getCharacterRealm(record), (_d = record.data) === null || _d === void 0 ? void 0 : _d.faction].filter(Boolean).join(" · "))}</span>
+            <span>${escapeHtml([(_e = record.data) === null || _e === void 0 ? void 0 : _e.active_spec_name, (_f = record.data) === null || _f === void 0 ? void 0 : _f.class].filter(Boolean).join(" ") || getStatusLabel(record))}</span>
+            <span>${escapeHtml([getCharacterRealm(record), (_g = record.data) === null || _g === void 0 ? void 0 : _g.faction].filter(Boolean).join(" · "))}</span>
           </div>
         </div>
       </td>
-      <td>
+      <td class="${getSearchDimClass(issueMatchesSearch)}">
         <strong>${getIssueCount(record)}</strong>
       </td>
       ${equipmentSlots.map((slot) => renderSlotCell(record, slot)).join("")}
@@ -549,24 +578,27 @@ const renderRecordRow = (record) => {
   `;
 };
 const renderIssueRow = (record, slot) => {
-    var _a, _b, _c, _d;
+    var _a, _b, _c, _d, _e, _f, _g;
     const characterName = getCharacterName(record);
+    const playerMatchesSearch = textMatchesSearch(characterName, record.player.name, getCharacterRealm(record), (_a = record.data) === null || _a === void 0 ? void 0 : _a.faction, (_b = record.data) === null || _b === void 0 ? void 0 : _b.active_spec_name, (_c = record.data) === null || _c === void 0 ? void 0 : _c.class);
+    const issueMatchesSearch = textMatchesSearch(getIssueCount(record), "issues");
+    const slotMatchesSearch = textMatchesSearch(slot.label);
     return `
     <tr>
-      <td>
+      <td class="${getSearchDimClass(playerMatchesSearch)}">
         <div class="player-cell">
-          ${((_a = record.data) === null || _a === void 0 ? void 0 : _a.thumbnail_url)
+          ${((_d = record.data) === null || _d === void 0 ? void 0 : _d.thumbnail_url)
         ? `<img class="avatar avatar--image" src="${escapeHtml(record.data.thumbnail_url)}" alt="" />`
         : `<span class="avatar" aria-hidden="true">${escapeHtml(getInitials(characterName))}</span>`}
           <div>
             <a class="armory-link" href="${escapeHtml(record.player.blizzardUrl)}" target="_blank" rel="noreferrer">${escapeHtml(characterName)}</a>
-            <span>${escapeHtml([(_b = record.data) === null || _b === void 0 ? void 0 : _b.active_spec_name, (_c = record.data) === null || _c === void 0 ? void 0 : _c.class].filter(Boolean).join(" ") || getStatusLabel(record))}</span>
-            <span>${escapeHtml([getCharacterRealm(record), (_d = record.data) === null || _d === void 0 ? void 0 : _d.faction].filter(Boolean).join(" · "))}</span>
+            <span>${escapeHtml([(_e = record.data) === null || _e === void 0 ? void 0 : _e.active_spec_name, (_f = record.data) === null || _f === void 0 ? void 0 : _f.class].filter(Boolean).join(" ") || getStatusLabel(record))}</span>
+            <span>${escapeHtml([getCharacterRealm(record), (_g = record.data) === null || _g === void 0 ? void 0 : _g.faction].filter(Boolean).join(" · "))}</span>
           </div>
         </div>
       </td>
-      <td><strong>${getIssueCount(record)}</strong></td>
-      <td><strong>${escapeHtml(slot.label)}</strong></td>
+      <td class="${getSearchDimClass(issueMatchesSearch)}"><strong>${getIssueCount(record)}</strong></td>
+      <td class="${getSearchDimClass(slotMatchesSearch)}"><strong>${escapeHtml(slot.label)}</strong></td>
       ${renderSlotCell(record, slot)}
     </tr>
   `;
@@ -735,7 +767,7 @@ const bindEvents = () => {
         button.addEventListener("click", () => {
             const itemKey = button.dataset.itemKey;
             state.selectedItem = itemKey ? getSelectedItemByKey(itemKey) : undefined;
-            render();
+            renderPreservingTableScroll();
         });
     });
     document.querySelectorAll("[data-close-modal]").forEach((element) => {
@@ -744,7 +776,7 @@ const bindEvents = () => {
                 return;
             }
             state.selectedItem = undefined;
-            render();
+            renderPreservingTableScroll();
         });
     });
     document.querySelectorAll("[data-sort]").forEach((button) => {
@@ -769,7 +801,7 @@ const bindEvents = () => {
 document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && state.selectedItem) {
         state.selectedItem = undefined;
-        render();
+        renderPreservingTableScroll();
     }
 });
 const fetchCharacter = (record) => __awaiter(void 0, void 0, void 0, function* () {

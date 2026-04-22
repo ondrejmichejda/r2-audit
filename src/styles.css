@@ -500,6 +500,15 @@ thead .sticky-cell {
   color: #ffb7b7;
 }
 
+.search-dimmed {
+  opacity: 0.24;
+  filter: grayscale(0.9);
+}
+
+.search-dimmed.sticky-cell {
+  background: var(--panel);
+}
+
 .slot-cell strong,
 .item-button strong {
   display: -webkit-box;

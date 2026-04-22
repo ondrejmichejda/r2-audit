@@ -286,16 +286,11 @@ table {
 
 .issue-table th:nth-child(2),
 .issue-table td:nth-child(2) {
-  width: 190px;
+  width: 90px;
 }
 
 .issue-table th:nth-child(3),
 .issue-table td:nth-child(3) {
-  width: 90px;
-}
-
-.issue-table th:nth-child(4),
-.issue-table td:nth-child(4) {
   width: 130px;
 }
 
@@ -337,12 +332,7 @@ th {
 
 .gear-table th:nth-child(2),
 .gear-table td:nth-child(2) {
-  width: 180px;
-}
-
-.gear-table th:nth-child(3),
-.gear-table td:nth-child(3) {
-  width: 100px;
+  width: 90px;
 }
 
 tbody tr {
@@ -381,11 +371,6 @@ thead .sticky-cell {
 
 .sticky-cell--player {
   left: 0;
-}
-
-.sticky-cell--realm {
-  left: 240px;
-  box-shadow: 8px 0 18px rgb(0 0 0 / 20%);
 }
 
 .player-cell {

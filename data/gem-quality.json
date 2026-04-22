@@ -9,6 +9,13 @@
       }
     },
     {
+      "label": "primary-with-mana",
+      "quality": "accepted",
+      "match": {
+        "textIncludes": "23 Primary / +1% Maximum Mana per unique Midnight gem color"
+      }
+    },
+    {
       "label": "primary",
       "quality": "accepted",
       "match": {
@@ -19,28 +26,28 @@
       "label": "secondary-mastery",
       "quality": "accepted",
       "match": {
-        "regex": "\\b16\\s+(mastery|mast)\\b"
+        "regex": "\\b(16|17)\\s+(mastery|mast)\\b"
       }
     },
     {
       "label": "secondary-haste",
       "quality": "accepted",
       "match": {
-        "regex": "\\b16\\s+haste\\b"
+        "regex": "\\b(16|17)\\s+(haste|hast)\\b"
       }
     },
     {
       "label": "secondary-critical",
       "quality": "accepted",
       "match": {
-        "regex": "\\b16\\s+(critical|crit)\\b"
+        "regex": "\\b(16|17)\\s+(critical|crit)\\b"
       }
     },
     {
       "label": "secondary-versatility",
       "quality": "accepted",
       "match": {
-        "regex": "\\b16\\s+(versatility|vers)\\b"
+        "regex": "\\b(16|17)\\s+(versatility|vers)\\b"
       }
     }
   ],

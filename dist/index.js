@@ -8,6 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+const appVersion = "20260422-1";
 const equipmentSlots = [
     { key: "head", label: "Head" },
     { key: "neck", label: "Neck" },
@@ -272,7 +273,7 @@ const normalizePlayer = (player) => {
     };
 };
 const loadPlayers = () => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield fetch("data/players.json");
+    const response = yield fetch(`data/players.json?v=${appVersion}`, { cache: "no-store" });
     if (!response.ok) {
         throw new Error(`Could not load data/players.json: HTTP ${response.status}`);
     }
@@ -283,7 +284,7 @@ const loadPlayers = () => __awaiter(void 0, void 0, void 0, function* () {
     }));
 });
 const loadGemQualityRules = () => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield fetch("data/gem-quality.json");
+    const response = yield fetch(`data/gem-quality.json?v=${appVersion}`, { cache: "no-store" });
     if (!response.ok) {
         throw new Error(`Could not load data/gem-quality.json: HTTP ${response.status}`);
     }
@@ -319,12 +320,15 @@ const getStatusLabel = (record) => {
     }
     return "Queued";
 };
-const itemHasIssue = (slot, item) => {
+const isDeathKnight = (record) => { var _a, _b; return ((_b = (_a = record.data) === null || _a === void 0 ? void 0 : _a.class) === null || _b === void 0 ? void 0 : _b.toLowerCase()) === "death knight"; };
+const isWeaponSlot = (slot) => slot.key === "mainhand" || slot.key === "offhand";
+const canCheckEnchant = (record, slot) => enchantableSlots.has(slot.key) && slot.key !== "offhand" && !(isDeathKnight(record) && isWeaponSlot(slot));
+const itemHasIssue = (record, slot, item) => {
     if (!item) {
         return false;
     }
     const tags = getItemTags(item);
-    const hasEnchantIssue = enchantableSlots.has(slot.key) && (!tags.enchantText || !tags.enchantQuality || tags.enchantQuality < 2);
+    const hasEnchantIssue = canCheckEnchant(record, slot) && (!tags.enchantText || !tags.enchantQuality || tags.enchantQuality < 2);
     const hasGemIssue = gemSlots.has(slot.key) && (!tags.gemText || !tags.isAcceptedGem);
     return hasEnchantIssue || hasGemIssue;
 };
@@ -332,12 +336,12 @@ const recordHasIssue = (record) => {
     if (record.status === "error") {
         return true;
     }
-    return equipmentSlots.some((slot) => { var _a, _b, _c; return itemHasIssue(slot, (_c = (_b = (_a = record.data) === null || _a === void 0 ? void 0 : _a.gear) === null || _b === void 0 ? void 0 : _b.items) === null || _c === void 0 ? void 0 : _c[slot.key]); });
+    return equipmentSlots.some((slot) => { var _a, _b, _c; return itemHasIssue(record, slot, (_c = (_b = (_a = record.data) === null || _a === void 0 ? void 0 : _a.gear) === null || _b === void 0 ? void 0 : _b.items) === null || _c === void 0 ? void 0 : _c[slot.key]); });
 };
-const getIssueSlots = (record) => equipmentSlots.filter((slot) => { var _a, _b, _c; return itemHasIssue(slot, (_c = (_b = (_a = record.data) === null || _a === void 0 ? void 0 : _a.gear) === null || _b === void 0 ? void 0 : _b.items) === null || _c === void 0 ? void 0 : _c[slot.key]); });
+const getIssueSlots = (record) => equipmentSlots.filter((slot) => { var _a, _b, _c; return itemHasIssue(record, slot, (_c = (_b = (_a = record.data) === null || _a === void 0 ? void 0 : _a.gear) === null || _b === void 0 ? void 0 : _b.items) === null || _c === void 0 ? void 0 : _c[slot.key]); });
 const getIssueCount = (record) => (record.status === "error" ? 1 : getIssueSlots(record).length);
 const getSortValue = (record) => {
-    var _a, _b, _c, _d, _e;
+    var _a, _b;
     switch (state.sortKey) {
         case "issueCount":
             return getIssueCount(record);
@@ -345,8 +349,6 @@ const getSortValue = (record) => {
             return getCharacterRealm(record);
         case "class":
             return (_b = (_a = record.data) === null || _a === void 0 ? void 0 : _a.class) !== null && _b !== void 0 ? _b : "";
-        case "itemLevel":
-            return (_e = (_d = (_c = record.data) === null || _c === void 0 ? void 0 : _c.gear) === null || _d === void 0 ? void 0 : _d.item_level_equipped) !== null && _e !== void 0 ? _e : -1;
         case "name":
         default:
             return getCharacterName(record);
@@ -478,7 +480,7 @@ const renderSlotCell = (record, slot) => {
         return `<td class="slot-cell"><span class="muted">Empty</span></td>`;
     }
     const tags = getItemTags(item);
-    const canHaveEnchant = enchantableSlots.has(slot.key);
+    const canHaveEnchant = canCheckEnchant(record, slot);
     const canHaveGem = gemSlots.has(slot.key);
     const track = getTrackInfo(item);
     const trackText = formatTrack(track) || getAmbiguousTrackText(item);
@@ -522,7 +524,7 @@ const renderItemModal = () => {
   `;
 };
 const renderRecordRow = (record) => {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+    var _a, _b, _c, _d;
     const characterName = getCharacterName(record);
     const thumbnail = (_a = record.data) === null || _a === void 0 ? void 0 : _a.thumbnail_url;
     return `
@@ -535,23 +537,19 @@ const renderRecordRow = (record) => {
           <div>
             <a class="armory-link" href="${escapeHtml(record.player.blizzardUrl)}" target="_blank" rel="noreferrer">${escapeHtml(characterName)}</a>
             <span>${escapeHtml([(_b = record.data) === null || _b === void 0 ? void 0 : _b.active_spec_name, (_c = record.data) === null || _c === void 0 ? void 0 : _c.class].filter(Boolean).join(" ") || getStatusLabel(record))}</span>
+            <span>${escapeHtml([getCharacterRealm(record), (_d = record.data) === null || _d === void 0 ? void 0 : _d.faction].filter(Boolean).join(" · "))}</span>
           </div>
         </div>
       </td>
-      <td class="sticky-cell sticky-cell--realm">
-        <strong>${escapeHtml(getCharacterRealm(record))}</strong>
-        <span>${escapeHtml((_f = (_e = (_d = record.data) === null || _d === void 0 ? void 0 : _d.faction) !== null && _e !== void 0 ? _e : record.error) !== null && _f !== void 0 ? _f : getStatusLabel(record))}</span>
-      </td>
       <td>
-        <strong>${formatNumber((_h = (_g = record.data) === null || _g === void 0 ? void 0 : _g.gear) === null || _h === void 0 ? void 0 : _h.item_level_equipped, 1)}</strong>
-        <span>Total ${formatNumber((_k = (_j = record.data) === null || _j === void 0 ? void 0 : _j.gear) === null || _k === void 0 ? void 0 : _k.item_level_total, 1)}</span>
+        <strong>${getIssueCount(record)}</strong>
       </td>
       ${equipmentSlots.map((slot) => renderSlotCell(record, slot)).join("")}
     </tr>
   `;
 };
 const renderIssueRow = (record, slot) => {
-    var _a, _b, _c, _d, _e, _f;
+    var _a, _b, _c, _d;
     const characterName = getCharacterName(record);
     return `
     <tr>
@@ -563,12 +561,9 @@ const renderIssueRow = (record, slot) => {
           <div>
             <a class="armory-link" href="${escapeHtml(record.player.blizzardUrl)}" target="_blank" rel="noreferrer">${escapeHtml(characterName)}</a>
             <span>${escapeHtml([(_b = record.data) === null || _b === void 0 ? void 0 : _b.active_spec_name, (_c = record.data) === null || _c === void 0 ? void 0 : _c.class].filter(Boolean).join(" ") || getStatusLabel(record))}</span>
+            <span>${escapeHtml([getCharacterRealm(record), (_d = record.data) === null || _d === void 0 ? void 0 : _d.faction].filter(Boolean).join(" · "))}</span>
           </div>
         </div>
-      </td>
-      <td>
-        <strong>${escapeHtml(getCharacterRealm(record))}</strong>
-        <span>${escapeHtml((_f = (_e = (_d = record.data) === null || _d === void 0 ? void 0 : _d.faction) !== null && _e !== void 0 ? _e : record.error) !== null && _f !== void 0 ? _f : getStatusLabel(record))}</span>
       </td>
       <td><strong>${getIssueCount(record)}</strong></td>
       <td><strong>${escapeHtml(slot.label)}</strong></td>
@@ -582,15 +577,14 @@ const renderFullTable = (filteredRecords) => `
       <thead>
         <tr>
           ${renderSortableHeader("name", "Player", "sticky-cell sticky-cell--player")}
-          ${renderSortableHeader("realm", "Realm", "sticky-cell sticky-cell--realm")}
-          ${renderSortableHeader("itemLevel", "Ilvl")}
+          ${renderSortableHeader("issueCount", "Issues")}
           ${equipmentSlots.map((slot) => `<th>${escapeHtml(slot.label)}</th>`).join("")}
         </tr>
       </thead>
       <tbody>
         ${filteredRecords.length
     ? filteredRecords.map(renderRecordRow).join("")
-    : `<tr><td class="empty-state" colspan="${equipmentSlots.length + 3}">No characters match the current filters.</td></tr>`}
+    : `<tr><td class="empty-state" colspan="${equipmentSlots.length + 2}">No characters match the current filters.</td></tr>`}
       </tbody>
     </table>
   </div>
@@ -606,7 +600,6 @@ const renderIssueItemsTable = (filteredRecords) => {
         <thead>
           <tr>
             ${renderSortableHeader("name", "Player")}
-            ${renderSortableHeader("realm", "Realm")}
             ${renderSortableHeader("issueCount", "Issues")}
             <th>Slot</th>
             <th>Issue item</th>
@@ -615,7 +608,7 @@ const renderIssueItemsTable = (filteredRecords) => {
         <tbody>
           ${issueRows.length
         ? issueRows.join("")
-        : `<tr><td class="empty-state" colspan="5">No issue items match the current filters.</td></tr>`}
+        : `<tr><td class="empty-state" colspan="4">No issue items match the current filters.</td></tr>`}
         </tbody>
       </table>
     </div>
@@ -767,7 +760,7 @@ const bindEvents = () => {
             }
             else {
                 state.sortKey = nextSortKey;
-                state.sortDirection = nextSortKey === "itemLevel" || nextSortKey === "issueCount" ? "desc" : "asc";
+                state.sortDirection = nextSortKey === "issueCount" ? "desc" : "asc";
             }
             render();
         });

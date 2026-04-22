@@ -75,7 +75,7 @@ type EquipmentSlot = {
   label: string;
 };
 
-type SortKey = "name" | "realm" | "class" | "itemLevel" | "issueCount";
+type SortKey = "name" | "realm" | "class" | "issueCount";
 type SortDirection = "asc" | "desc";
 type QuickFilter = "all" | "issues";
 type ViewMode = "full" | "issueItems";
@@ -86,6 +86,8 @@ type TrackInfo = {
   maxRank: number;
   source: "bonus" | "item-level";
 };
+
+const appVersion = "20260422-1";
 
 const equipmentSlots: EquipmentSlot[] = [
   { key: "head", label: "Head" },
@@ -379,7 +381,7 @@ const normalizePlayer = (player: PlayerJson): Player => {
 };
 
 const loadPlayers = async () => {
-  const response = await fetch("data/players.json");
+  const response = await fetch(`data/players.json?v=${appVersion}`, { cache: "no-store" });
 
   if (!response.ok) {
     throw new Error(`Could not load data/players.json: HTTP ${response.status}`);
@@ -394,7 +396,7 @@ const loadPlayers = async () => {
 };
 
 const loadGemQualityRules = async () => {
-  const response = await fetch("data/gem-quality.json");
+  const response = await fetch(`data/gem-quality.json?v=${appVersion}`, { cache: "no-store" });
 
   if (!response.ok) {
     throw new Error(`Could not load data/gem-quality.json: HTTP ${response.status}`);
@@ -441,13 +443,20 @@ const getStatusLabel = (record: PlayerRecord) => {
   return "Queued";
 };
 
-const itemHasIssue = (slot: EquipmentSlot, item?: RaiderItem) => {
+const isDeathKnight = (record: PlayerRecord) => record.data?.class?.toLowerCase() === "death knight";
+
+const isWeaponSlot = (slot: EquipmentSlot) => slot.key === "mainhand" || slot.key === "offhand";
+
+const canCheckEnchant = (record: PlayerRecord, slot: EquipmentSlot) =>
+  enchantableSlots.has(slot.key) && slot.key !== "offhand" && !(isDeathKnight(record) && isWeaponSlot(slot));
+
+const itemHasIssue = (record: PlayerRecord, slot: EquipmentSlot, item?: RaiderItem) => {
   if (!item) {
     return false;
   }
 
   const tags = getItemTags(item);
-  const hasEnchantIssue = enchantableSlots.has(slot.key) && (!tags.enchantText || !tags.enchantQuality || tags.enchantQuality < 2);
+  const hasEnchantIssue = canCheckEnchant(record, slot) && (!tags.enchantText || !tags.enchantQuality || tags.enchantQuality < 2);
   const hasGemIssue = gemSlots.has(slot.key) && (!tags.gemText || !tags.isAcceptedGem);
 
   return hasEnchantIssue || hasGemIssue;
@@ -458,11 +467,11 @@ const recordHasIssue = (record: PlayerRecord) => {
     return true;
   }
 
-  return equipmentSlots.some((slot) => itemHasIssue(slot, record.data?.gear?.items?.[slot.key]));
+  return equipmentSlots.some((slot) => itemHasIssue(record, slot, record.data?.gear?.items?.[slot.key]));
 };
 
 const getIssueSlots = (record: PlayerRecord) =>
-  equipmentSlots.filter((slot) => itemHasIssue(slot, record.data?.gear?.items?.[slot.key]));
+  equipmentSlots.filter((slot) => itemHasIssue(record, slot, record.data?.gear?.items?.[slot.key]));
 
 const getIssueCount = (record: PlayerRecord) => (record.status === "error" ? 1 : getIssueSlots(record).length);
 
@@ -474,8 +483,6 @@ const getSortValue = (record: PlayerRecord) => {
       return getCharacterRealm(record);
     case "class":
       return record.data?.class ?? "";
-    case "itemLevel":
-      return record.data?.gear?.item_level_equipped ?? -1;
     case "name":
     default:
       return getCharacterName(record);
@@ -633,7 +640,7 @@ const renderSlotCell = (record: PlayerRecord, slot: EquipmentSlot) => {
   }
 
   const tags = getItemTags(item);
-  const canHaveEnchant = enchantableSlots.has(slot.key);
+  const canHaveEnchant = canCheckEnchant(record, slot);
   const canHaveGem = gemSlots.has(slot.key);
   const track = getTrackInfo(item);
   const trackText = formatTrack(track) || getAmbiguousTrackText(item);
@@ -700,16 +707,12 @@ const renderRecordRow = (record: PlayerRecord) => {
           <div>
             <a class="armory-link" href="${escapeHtml(record.player.blizzardUrl)}" target="_blank" rel="noreferrer">${escapeHtml(characterName)}</a>
             <span>${escapeHtml([record.data?.active_spec_name, record.data?.class].filter(Boolean).join(" ") || getStatusLabel(record))}</span>
+            <span>${escapeHtml([getCharacterRealm(record), record.data?.faction].filter(Boolean).join(" · "))}</span>
           </div>
         </div>
       </td>
-      <td class="sticky-cell sticky-cell--realm">
-        <strong>${escapeHtml(getCharacterRealm(record))}</strong>
-        <span>${escapeHtml(record.data?.faction ?? record.error ?? getStatusLabel(record))}</span>
-      </td>
       <td>
-        <strong>${formatNumber(record.data?.gear?.item_level_equipped, 1)}</strong>
-        <span>Total ${formatNumber(record.data?.gear?.item_level_total, 1)}</span>
+        <strong>${getIssueCount(record)}</strong>
       </td>
       ${equipmentSlots.map((slot) => renderSlotCell(record, slot)).join("")}
     </tr>
@@ -731,12 +734,9 @@ const renderIssueRow = (record: PlayerRecord, slot: EquipmentSlot) => {
           <div>
             <a class="armory-link" href="${escapeHtml(record.player.blizzardUrl)}" target="_blank" rel="noreferrer">${escapeHtml(characterName)}</a>
             <span>${escapeHtml([record.data?.active_spec_name, record.data?.class].filter(Boolean).join(" ") || getStatusLabel(record))}</span>
+            <span>${escapeHtml([getCharacterRealm(record), record.data?.faction].filter(Boolean).join(" · "))}</span>
           </div>
         </div>
-      </td>
-      <td>
-        <strong>${escapeHtml(getCharacterRealm(record))}</strong>
-        <span>${escapeHtml(record.data?.faction ?? record.error ?? getStatusLabel(record))}</span>
       </td>
       <td><strong>${getIssueCount(record)}</strong></td>
       <td><strong>${escapeHtml(slot.label)}</strong></td>
@@ -751,8 +751,7 @@ const renderFullTable = (filteredRecords: PlayerRecord[]) => `
       <thead>
         <tr>
           ${renderSortableHeader("name", "Player", "sticky-cell sticky-cell--player")}
-          ${renderSortableHeader("realm", "Realm", "sticky-cell sticky-cell--realm")}
-          ${renderSortableHeader("itemLevel", "Ilvl")}
+          ${renderSortableHeader("issueCount", "Issues")}
           ${equipmentSlots.map((slot) => `<th>${escapeHtml(slot.label)}</th>`).join("")}
         </tr>
       </thead>
@@ -760,7 +759,7 @@ const renderFullTable = (filteredRecords: PlayerRecord[]) => `
         ${
           filteredRecords.length
             ? filteredRecords.map(renderRecordRow).join("")
-            : `<tr><td class="empty-state" colspan="${equipmentSlots.length + 3}">No characters match the current filters.</td></tr>`
+            : `<tr><td class="empty-state" colspan="${equipmentSlots.length + 2}">No characters match the current filters.</td></tr>`
         }
       </tbody>
     </table>
@@ -779,7 +778,6 @@ const renderIssueItemsTable = (filteredRecords: PlayerRecord[]) => {
         <thead>
           <tr>
             ${renderSortableHeader("name", "Player")}
-            ${renderSortableHeader("realm", "Realm")}
             ${renderSortableHeader("issueCount", "Issues")}
             <th>Slot</th>
             <th>Issue item</th>
@@ -789,7 +787,7 @@ const renderIssueItemsTable = (filteredRecords: PlayerRecord[]) => {
           ${
             issueRows.length
               ? issueRows.join("")
-              : `<tr><td class="empty-state" colspan="5">No issue items match the current filters.</td></tr>`
+              : `<tr><td class="empty-state" colspan="4">No issue items match the current filters.</td></tr>`
           }
         </tbody>
       </table>
@@ -957,7 +955,7 @@ const bindEvents = () => {
         state.sortDirection = state.sortDirection === "asc" ? "desc" : "asc";
       } else {
         state.sortKey = nextSortKey;
-        state.sortDirection = nextSortKey === "itemLevel" || nextSortKey === "issueCount" ? "desc" : "asc";
+        state.sortDirection = nextSortKey === "issueCount" ? "desc" : "asc";
       }
 
       render();

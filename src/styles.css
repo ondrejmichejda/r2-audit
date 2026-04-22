@@ -156,20 +156,18 @@ h1 {
 
 .toolbar {
   display: grid;
-  grid-template-columns: auto auto minmax(220px, 1fr) minmax(220px, 320px);
+  grid-template-columns: auto minmax(220px, 1fr) minmax(220px, 320px);
   align-items: end;
   gap: 16px;
   margin: 24px 0;
 }
 
-.quick-filters,
 .view-modes {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.quick-filter,
 .view-mode {
   min-height: 46px;
   border: 1px solid var(--line);
@@ -181,22 +179,14 @@ h1 {
   padding: 0 14px;
 }
 
-.quick-filter:hover,
 .view-mode:hover {
   border-color: var(--gold-strong);
   color: var(--text);
 }
 
-.quick-filter--active,
 .view-mode--active {
   border-color: var(--gold-strong);
   background: rgb(216 166 74 / 14%);
-  color: #ffffff;
-}
-
-.quick-filter--issues.quick-filter--active {
-  border-color: #ff4d4d;
-  background: rgb(214 0 0 / 20%);
   color: #ffffff;
 }
 
@@ -228,7 +218,6 @@ h1 {
 .sort-button:focus-visible,
 .profile-link:focus-visible,
 .refresh-button:focus-visible,
-.quick-filter:focus-visible,
 .view-mode:focus-visible {
   border-color: var(--gold-strong);
   box-shadow: 0 0 0 3px rgb(240 195 106 / 22%);
@@ -262,7 +251,9 @@ h1 {
 }
 
 .table-scroll {
-  overflow-x: auto;
+  max-height: calc(100vh - 180px);
+  overflow: auto;
+  scrollbar-gutter: stable;
 }
 
 table {
@@ -279,19 +270,14 @@ table {
   min-width: 900px;
 }
 
-.issue-table th:nth-child(1),
 .issue-table td:nth-child(1) {
   width: 260px;
+  min-width: 260px;
 }
 
-.issue-table th:nth-child(2),
-.issue-table td:nth-child(2) {
-  width: 90px;
-}
-
-.issue-table th:nth-child(3),
-.issue-table td:nth-child(3) {
-  width: 130px;
+.issue-table .issue-item-cell {
+  width: 240px;
+  min-width: 240px;
 }
 
 th,
@@ -386,6 +372,15 @@ thead .sticky-cell {
   color: var(--muted);
   font-size: 0.86rem;
   line-height: 1.35;
+}
+
+.slot-label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
 }
 
 .armory-link {
@@ -498,15 +493,6 @@ thead .sticky-cell {
 
 .error-text {
   color: #ffb7b7;
-}
-
-.search-dimmed {
-  opacity: 0.24;
-  filter: grayscale(0.9);
-}
-
-.search-dimmed.sticky-cell {
-  background: var(--panel);
 }
 
 .slot-cell strong,
@@ -754,6 +740,10 @@ thead .sticky-cell {
 
   .toolbar {
     grid-template-columns: 1fr;
+  }
+
+  .table-scroll {
+    max-height: calc(100vh - 140px);
   }
 }
 

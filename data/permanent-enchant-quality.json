@@ -1,0 +1,1063 @@
+{
+  "source": "data/permanent_enchant.inc",
+  "build": "12.0.5.67088",
+  "qualityField": "second numeric field in permanent_enchant_entry_t",
+  "enchants": [
+    {
+      "id": 7936,
+      "quality": 1,
+      "type": 4,
+      "key": "arcanoweave_spellthread"
+    },
+    {
+      "id": 7937,
+      "quality": 2,
+      "type": 4,
+      "key": "arcanoweave_spellthread"
+    },
+    {
+      "id": 3720,
+      "quality": 0,
+      "type": 4,
+      "key": "azure_spellthread"
+    },
+    {
+      "id": 8162,
+      "quality": 1,
+      "type": 4,
+      "key": "blood_knights_armor_kit"
+    },
+    {
+      "id": 8163,
+      "quality": 2,
+      "type": 4,
+      "key": "blood_knights_armor_kit"
+    },
+    {
+      "id": 3329,
+      "quality": 0,
+      "type": 4,
+      "key": "borean_armor_kit"
+    },
+    {
+      "id": 7938,
+      "quality": 1,
+      "type": 4,
+      "key": "bright_linen_spellthread"
+    },
+    {
+      "id": 7939,
+      "quality": 2,
+      "type": 4,
+      "key": "bright_linen_spellthread"
+    },
+    {
+      "id": 3719,
+      "quality": 0,
+      "type": 4,
+      "key": "brilliant_spellthread"
+    },
+    {
+      "id": 5003,
+      "quality": 0,
+      "type": 4,
+      "key": "cerulean_spellthread"
+    },
+    {
+      "id": 7652,
+      "quality": 1,
+      "type": 4,
+      "key": "charged_armor_kit"
+    },
+    {
+      "id": 7653,
+      "quality": 2,
+      "type": 4,
+      "key": "charged_armor_kit"
+    },
+    {
+      "id": 7654,
+      "quality": 3,
+      "type": 4,
+      "key": "charged_armor_kit"
+    },
+    {
+      "id": 2503,
+      "quality": 0,
+      "type": 4,
+      "key": "core_armor_kit"
+    },
+    {
+      "id": 7529,
+      "quality": 1,
+      "type": 4,
+      "key": "daybreak_spellthread"
+    },
+    {
+      "id": 7530,
+      "quality": 2,
+      "type": 4,
+      "key": "daybreak_spellthread"
+    },
+    {
+      "id": 7531,
+      "quality": 3,
+      "type": 4,
+      "key": "daybreak_spellthread"
+    },
+    {
+      "id": 7593,
+      "quality": 1,
+      "type": 4,
+      "key": "defenders_armor_kit"
+    },
+    {
+      "id": 7594,
+      "quality": 2,
+      "type": 4,
+      "key": "defenders_armor_kit"
+    },
+    {
+      "id": 7595,
+      "quality": 3,
+      "type": 4,
+      "key": "defenders_armor_kit"
+    },
+    {
+      "id": 6088,
+      "quality": 0,
+      "type": 4,
+      "key": "discreet_spellthread"
+    },
+    {
+      "id": 7596,
+      "quality": 1,
+      "type": 4,
+      "key": "dual_layered_armor_kit"
+    },
+    {
+      "id": 7597,
+      "quality": 2,
+      "type": 4,
+      "key": "dual_layered_armor_kit"
+    },
+    {
+      "id": 7598,
+      "quality": 3,
+      "type": 4,
+      "key": "dual_layered_armor_kit"
+    },
+    {
+      "id": 8018,
+      "quality": 1,
+      "type": 4,
+      "key": "enchant_boots__farstriders_hunt"
+    },
+    {
+      "id": 8019,
+      "quality": 2,
+      "type": 4,
+      "key": "enchant_boots__farstriders_hunt"
+    },
+    {
+      "id": 7962,
+      "quality": 1,
+      "type": 4,
+      "key": "enchant_boots__lynxs_dexterity"
+    },
+    {
+      "id": 7963,
+      "quality": 2,
+      "type": 4,
+      "key": "enchant_boots__lynxs_dexterity"
+    },
+    {
+      "id": 7992,
+      "quality": 1,
+      "type": 4,
+      "key": "enchant_boots__shaladrassils_roots"
+    },
+    {
+      "id": 7993,
+      "quality": 2,
+      "type": 4,
+      "key": "enchant_boots__shaladrassils_roots"
+    },
+    {
+      "id": 7956,
+      "quality": 1,
+      "type": 4,
+      "key": "enchant_chest__mark_of_nalorakk"
+    },
+    {
+      "id": 7957,
+      "quality": 2,
+      "type": 4,
+      "key": "enchant_chest__mark_of_nalorakk"
+    },
+    {
+      "id": 8012,
+      "quality": 1,
+      "type": 4,
+      "key": "enchant_chest__mark_of_the_magister"
+    },
+    {
+      "id": 8013,
+      "quality": 2,
+      "type": 4,
+      "key": "enchant_chest__mark_of_the_magister"
+    },
+    {
+      "id": 7984,
+      "quality": 1,
+      "type": 4,
+      "key": "enchant_chest__mark_of_the_rootwarden"
+    },
+    {
+      "id": 7985,
+      "quality": 2,
+      "type": 4,
+      "key": "enchant_chest__mark_of_the_rootwarden"
+    },
+    {
+      "id": 7986,
+      "quality": 1,
+      "type": 4,
+      "key": "enchant_chest__mark_of_the_worldsoul"
+    },
+    {
+      "id": 7987,
+      "quality": 2,
+      "type": 4,
+      "key": "enchant_chest__mark_of_the_worldsoul"
+    },
+    {
+      "id": 7988,
+      "quality": 1,
+      "type": 4,
+      "key": "enchant_helm__blessing_of_speed"
+    },
+    {
+      "id": 7989,
+      "quality": 2,
+      "type": 4,
+      "key": "enchant_helm__blessing_of_speed"
+    },
+    {
+      "id": 7990,
+      "quality": 1,
+      "type": 4,
+      "key": "enchant_helm__empowered_blessing_of_speed"
+    },
+    {
+      "id": 7991,
+      "quality": 2,
+      "type": 4,
+      "key": "enchant_helm__empowered_blessing_of_speed"
+    },
+    {
+      "id": 7960,
+      "quality": 1,
+      "type": 4,
+      "key": "enchant_helm__empowered_hex_of_leeching"
+    },
+    {
+      "id": 7961,
+      "quality": 2,
+      "type": 4,
+      "key": "enchant_helm__empowered_hex_of_leeching"
+    },
+    {
+      "id": 8016,
+      "quality": 1,
+      "type": 4,
+      "key": "enchant_helm__empowered_rune_of_avoidance"
+    },
+    {
+      "id": 8017,
+      "quality": 2,
+      "type": 4,
+      "key": "enchant_helm__empowered_rune_of_avoidance"
+    },
+    {
+      "id": 7958,
+      "quality": 1,
+      "type": 4,
+      "key": "enchant_helm__hex_of_leeching"
+    },
+    {
+      "id": 7959,
+      "quality": 2,
+      "type": 4,
+      "key": "enchant_helm__hex_of_leeching"
+    },
+    {
+      "id": 8014,
+      "quality": 1,
+      "type": 4,
+      "key": "enchant_helm__rune_of_avoidance"
+    },
+    {
+      "id": 8015,
+      "quality": 2,
+      "type": 4,
+      "key": "enchant_helm__rune_of_avoidance"
+    },
+    {
+      "id": 7964,
+      "quality": 1,
+      "type": 4,
+      "key": "enchant_ring__amani_mastery"
+    },
+    {
+      "id": 7965,
+      "quality": 2,
+      "type": 4,
+      "key": "enchant_ring__amani_mastery"
+    },
+    {
+      "id": 7966,
+      "quality": 1,
+      "type": 4,
+      "key": "enchant_ring__eyes_of_the_eagle"
+    },
+    {
+      "id": 7967,
+      "quality": 2,
+      "type": 4,
+      "key": "enchant_ring__eyes_of_the_eagle"
+    },
+    {
+      "id": 7996,
+      "quality": 1,
+      "type": 4,
+      "key": "enchant_ring__natures_fury"
+    },
+    {
+      "id": 7997,
+      "quality": 2,
+      "type": 4,
+      "key": "enchant_ring__natures_fury"
+    },
+    {
+      "id": 7994,
+      "quality": 1,
+      "type": 4,
+      "key": "enchant_ring__natures_wrath"
+    },
+    {
+      "id": 7995,
+      "quality": 2,
+      "type": 4,
+      "key": "enchant_ring__natures_wrath"
+    },
+    {
+      "id": 8024,
+      "quality": 1,
+      "type": 4,
+      "key": "enchant_ring__silvermoons_alacrity"
+    },
+    {
+      "id": 8025,
+      "quality": 2,
+      "type": 4,
+      "key": "enchant_ring__silvermoons_alacrity"
+    },
+    {
+      "id": 8026,
+      "quality": 1,
+      "type": 4,
+      "key": "enchant_ring__silvermoons_tenacity"
+    },
+    {
+      "id": 8027,
+      "quality": 2,
+      "type": 4,
+      "key": "enchant_ring__silvermoons_tenacity"
+    },
+    {
+      "id": 8020,
+      "quality": 1,
+      "type": 4,
+      "key": "enchant_ring__thalassian_haste"
+    },
+    {
+      "id": 8021,
+      "quality": 2,
+      "type": 4,
+      "key": "enchant_ring__thalassian_haste"
+    },
+    {
+      "id": 8022,
+      "quality": 1,
+      "type": 4,
+      "key": "enchant_ring__thalassian_versatility"
+    },
+    {
+      "id": 8023,
+      "quality": 2,
+      "type": 4,
+      "key": "enchant_ring__thalassian_versatility"
+    },
+    {
+      "id": 7968,
+      "quality": 1,
+      "type": 4,
+      "key": "enchant_ring__zuljins_mastery"
+    },
+    {
+      "id": 7969,
+      "quality": 2,
+      "type": 4,
+      "key": "enchant_ring__zuljins_mastery"
+    },
+    {
+      "id": 7972,
+      "quality": 1,
+      "type": 4,
+      "key": "enchant_shoulders__akilzons_swiftness"
+    },
+    {
+      "id": 7973,
+      "quality": 2,
+      "type": 4,
+      "key": "enchant_shoulders__akilzons_swiftness"
+    },
+    {
+      "id": 8000,
+      "quality": 1,
+      "type": 4,
+      "key": "enchant_shoulders__amirdrassils_grace"
+    },
+    {
+      "id": 8001,
+      "quality": 2,
+      "type": 4,
+      "key": "enchant_shoulders__amirdrassils_grace"
+    },
+    {
+      "id": 7970,
+      "quality": 1,
+      "type": 4,
+      "key": "enchant_shoulders__flight_of_the_eagle"
+    },
+    {
+      "id": 7971,
+      "quality": 2,
+      "type": 4,
+      "key": "enchant_shoulders__flight_of_the_eagle"
+    },
+    {
+      "id": 7998,
+      "quality": 1,
+      "type": 4,
+      "key": "enchant_shoulders__natures_grace"
+    },
+    {
+      "id": 7999,
+      "quality": 2,
+      "type": 4,
+      "key": "enchant_shoulders__natures_grace"
+    },
+    {
+      "id": 8030,
+      "quality": 1,
+      "type": 4,
+      "key": "enchant_shoulders__silvermoons_mending"
+    },
+    {
+      "id": 8031,
+      "quality": 2,
+      "type": 4,
+      "key": "enchant_shoulders__silvermoons_mending"
+    },
+    {
+      "id": 8028,
+      "quality": 1,
+      "type": 4,
+      "key": "enchant_shoulders__thalassian_recovery"
+    },
+    {
+      "id": 8029,
+      "quality": 2,
+      "type": 4,
+      "key": "enchant_shoulders__thalassian_recovery"
+    },
+    {
+      "id": 7974,
+      "quality": 1,
+      "type": 19,
+      "key": "enchant_tool__amani_perception"
+    },
+    {
+      "id": 7975,
+      "quality": 2,
+      "type": 19,
+      "key": "enchant_tool__amani_perception"
+    },
+    {
+      "id": 7976,
+      "quality": 1,
+      "type": 19,
+      "key": "enchant_tool__amani_resourcefulness"
+    },
+    {
+      "id": 7977,
+      "quality": 2,
+      "type": 19,
+      "key": "enchant_tool__amani_resourcefulness"
+    },
+    {
+      "id": 8002,
+      "quality": 1,
+      "type": 19,
+      "key": "enchant_tool__haranir_finesse"
+    },
+    {
+      "id": 8003,
+      "quality": 2,
+      "type": 19,
+      "key": "enchant_tool__haranir_finesse"
+    },
+    {
+      "id": 8004,
+      "quality": 1,
+      "type": 19,
+      "key": "enchant_tool__haranir_multicrafting"
+    },
+    {
+      "id": 8005,
+      "quality": 2,
+      "type": 19,
+      "key": "enchant_tool__haranir_multicrafting"
+    },
+    {
+      "id": 8034,
+      "quality": 1,
+      "type": 19,
+      "key": "enchant_tool__rendorei_ingenuity"
+    },
+    {
+      "id": 8035,
+      "quality": 2,
+      "type": 19,
+      "key": "enchant_tool__rendorei_ingenuity"
+    },
+    {
+      "id": 8032,
+      "quality": 1,
+      "type": 19,
+      "key": "enchant_tool__sindorei_deftness"
+    },
+    {
+      "id": 8033,
+      "quality": 2,
+      "type": 19,
+      "key": "enchant_tool__sindorei_deftness"
+    },
+    {
+      "id": 8038,
+      "quality": 1,
+      "type": 2,
+      "key": "enchant_weapon__acuity_of_the_rendorei"
+    },
+    {
+      "id": 8039,
+      "quality": 2,
+      "type": 2,
+      "key": "enchant_weapon__acuity_of_the_rendorei"
+    },
+    {
+      "id": 8040,
+      "quality": 1,
+      "type": 2,
+      "key": "enchant_weapon__arcane_mastery"
+    },
+    {
+      "id": 8041,
+      "quality": 2,
+      "type": 2,
+      "key": "enchant_weapon__arcane_mastery"
+    },
+    {
+      "id": 7982,
+      "quality": 1,
+      "type": 2,
+      "key": "enchant_weapon__berserkers_rage"
+    },
+    {
+      "id": 7983,
+      "quality": 2,
+      "type": 2,
+      "key": "enchant_weapon__berserkers_rage"
+    },
+    {
+      "id": 8036,
+      "quality": 1,
+      "type": 2,
+      "key": "enchant_weapon__flames_of_the_sindorei"
+    },
+    {
+      "id": 8037,
+      "quality": 2,
+      "type": 2,
+      "key": "enchant_weapon__flames_of_the_sindorei"
+    },
+    {
+      "id": 7980,
+      "quality": 1,
+      "type": 2,
+      "key": "enchant_weapon__janalais_precision"
+    },
+    {
+      "id": 7981,
+      "quality": 2,
+      "type": 2,
+      "key": "enchant_weapon__janalais_precision"
+    },
+    {
+      "id": 7978,
+      "quality": 1,
+      "type": 2,
+      "key": "enchant_weapon__strength_of_halazzi"
+    },
+    {
+      "id": 7979,
+      "quality": 2,
+      "type": 2,
+      "key": "enchant_weapon__strength_of_halazzi"
+    },
+    {
+      "id": 8008,
+      "quality": 1,
+      "type": 2,
+      "key": "enchant_weapon__worldsoul_aegis"
+    },
+    {
+      "id": 8009,
+      "quality": 2,
+      "type": 2,
+      "key": "enchant_weapon__worldsoul_aegis"
+    },
+    {
+      "id": 8006,
+      "quality": 1,
+      "type": 2,
+      "key": "enchant_weapon__worldsoul_cradle"
+    },
+    {
+      "id": 8007,
+      "quality": 2,
+      "type": 2,
+      "key": "enchant_weapon__worldsoul_cradle"
+    },
+    {
+      "id": 8010,
+      "quality": 1,
+      "type": 2,
+      "key": "enchant_weapon__worldsoul_tenacity"
+    },
+    {
+      "id": 8011,
+      "quality": 2,
+      "type": 2,
+      "key": "enchant_weapon__worldsoul_tenacity"
+    },
+    {
+      "id": 4111,
+      "quality": 0,
+      "type": 4,
+      "key": "enchanted_spellthread"
+    },
+    {
+      "id": 6089,
+      "quality": 0,
+      "type": 4,
+      "key": "feathery_spellthread"
+    },
+    {
+      "id": 6488,
+      "quality": 1,
+      "type": 4,
+      "key": "fierce_armor_kit"
+    },
+    {
+      "id": 6489,
+      "quality": 2,
+      "type": 4,
+      "key": "fierce_armor_kit"
+    },
+    {
+      "id": 6490,
+      "quality": 3,
+      "type": 4,
+      "key": "fierce_armor_kit"
+    },
+    {
+      "id": 8158,
+      "quality": 1,
+      "type": 4,
+      "key": "forest_hunters_armor_kit"
+    },
+    {
+      "id": 8159,
+      "quality": 2,
+      "type": 4,
+      "key": "forest_hunters_armor_kit"
+    },
+    {
+      "id": 6494,
+      "quality": 1,
+      "type": 4,
+      "key": "frosted_armor_kit"
+    },
+    {
+      "id": 6495,
+      "quality": 2,
+      "type": 4,
+      "key": "frosted_armor_kit"
+    },
+    {
+      "id": 6496,
+      "quality": 3,
+      "type": 4,
+      "key": "frosted_armor_kit"
+    },
+    {
+      "id": 6539,
+      "quality": 1,
+      "type": 4,
+      "key": "frozen_spellthread"
+    },
+    {
+      "id": 6540,
+      "quality": 2,
+      "type": 4,
+      "key": "frozen_spellthread"
+    },
+    {
+      "id": 6541,
+      "quality": 3,
+      "type": 4,
+      "key": "frozen_spellthread"
+    },
+    {
+      "id": 4109,
+      "quality": 0,
+      "type": 4,
+      "key": "ghostly_spellthread"
+    },
+    {
+      "id": 2746,
+      "quality": 0,
+      "type": 4,
+      "key": "golden_spellthread"
+    },
+    {
+      "id": 4825,
+      "quality": 0,
+      "type": 4,
+      "key": "greater_cerulean_spellthread"
+    },
+    {
+      "id": 4826,
+      "quality": 0,
+      "type": 4,
+      "key": "greater_pearlescent_spellthread"
+    },
+    {
+      "id": 17,
+      "quality": 0,
+      "type": 4,
+      "key": "heavy_armor_kit"
+    },
+    {
+      "id": 3330,
+      "quality": 0,
+      "type": 4,
+      "key": "heavy_borean_armor_kit"
+    },
+    {
+      "id": 2841,
+      "quality": 0,
+      "type": 4,
+      "key": "heavy_knothide_armor_kit"
+    },
+    {
+      "id": 4121,
+      "quality": 0,
+      "type": 4,
+      "key": "heavy_savage_armor_kit"
+    },
+    {
+      "id": 2792,
+      "quality": 0,
+      "type": 4,
+      "key": "knothide_armor_kit"
+    },
+    {
+      "id": 6828,
+      "quality": 1,
+      "type": 4,
+      "key": "lambent_armor_kit"
+    },
+    {
+      "id": 6829,
+      "quality": 2,
+      "type": 4,
+      "key": "lambent_armor_kit"
+    },
+    {
+      "id": 6830,
+      "quality": 3,
+      "type": 4,
+      "key": "lambent_armor_kit"
+    },
+    {
+      "id": 15,
+      "quality": 0,
+      "type": 4,
+      "key": "light_armor_kit"
+    },
+    {
+      "id": 2794,
+      "quality": 0,
+      "type": 4,
+      "key": "magisters_armor_kit"
+    },
+    {
+      "id": 4895,
+      "quality": 0,
+      "type": 4,
+      "key": "masters_spellthread"
+    },
+    {
+      "id": 16,
+      "quality": 0,
+      "type": 4,
+      "key": "medium_armor_kit"
+    },
+    {
+      "id": 2747,
+      "quality": 0,
+      "type": 4,
+      "key": "mystic_spellthread"
+    },
+    {
+      "id": 5004,
+      "quality": 0,
+      "type": 4,
+      "key": "pearlescent_spellthread"
+    },
+    {
+      "id": 4112,
+      "quality": 0,
+      "type": 4,
+      "key": "powerful_enchanted_spellthread"
+    },
+    {
+      "id": 4110,
+      "quality": 0,
+      "type": 4,
+      "key": "powerful_ghostly_spellthread"
+    },
+    {
+      "id": 6491,
+      "quality": 1,
+      "type": 4,
+      "key": "reinforced_armor_kit"
+    },
+    {
+      "id": 6492,
+      "quality": 2,
+      "type": 4,
+      "key": "reinforced_armor_kit"
+    },
+    {
+      "id": 6493,
+      "quality": 3,
+      "type": 4,
+      "key": "reinforced_armor_kit"
+    },
+    {
+      "id": 6087,
+      "quality": 0,
+      "type": 4,
+      "key": "resilient_spellthread"
+    },
+    {
+      "id": 1843,
+      "quality": 0,
+      "type": 4,
+      "key": "rugged_armor_kit"
+    },
+    {
+      "id": 2748,
+      "quality": 0,
+      "type": 4,
+      "key": "runic_spellthread"
+    },
+    {
+      "id": 4896,
+      "quality": 0,
+      "type": 4,
+      "key": "sanctified_spellthread"
+    },
+    {
+      "id": 3721,
+      "quality": 0,
+      "type": 4,
+      "key": "sapphire_spellthread"
+    },
+    {
+      "id": 4120,
+      "quality": 0,
+      "type": 4,
+      "key": "savage_armor_kit"
+    },
+    {
+      "id": 4869,
+      "quality": 0,
+      "type": 4,
+      "key": "sha_armor_kit"
+    },
+    {
+      "id": 3718,
+      "quality": 0,
+      "type": 4,
+      "key": "shining_spellthread"
+    },
+    {
+      "id": 2745,
+      "quality": 0,
+      "type": 4,
+      "key": "silver_spellthread"
+    },
+    {
+      "id": 7599,
+      "quality": 1,
+      "type": 4,
+      "key": "stormbound_armor_kit"
+    },
+    {
+      "id": 7600,
+      "quality": 2,
+      "type": 4,
+      "key": "stormbound_armor_kit"
+    },
+    {
+      "id": 7601,
+      "quality": 3,
+      "type": 4,
+      "key": "stormbound_armor_kit"
+    },
+    {
+      "id": 7934,
+      "quality": 1,
+      "type": 4,
+      "key": "sunfire_silk_spellthread"
+    },
+    {
+      "id": 7935,
+      "quality": 2,
+      "type": 4,
+      "key": "sunfire_silk_spellthread"
+    },
+    {
+      "id": 7532,
+      "quality": 1,
+      "type": 4,
+      "key": "sunset_spellthread"
+    },
+    {
+      "id": 7533,
+      "quality": 2,
+      "type": 4,
+      "key": "sunset_spellthread"
+    },
+    {
+      "id": 7534,
+      "quality": 3,
+      "type": 4,
+      "key": "sunset_spellthread"
+    },
+    {
+      "id": 6542,
+      "quality": 1,
+      "type": 4,
+      "key": "temporal_spellthread"
+    },
+    {
+      "id": 6543,
+      "quality": 2,
+      "type": 4,
+      "key": "temporal_spellthread"
+    },
+    {
+      "id": 6544,
+      "quality": 3,
+      "type": 4,
+      "key": "temporal_spellthread"
+    },
+    {
+      "id": 8160,
+      "quality": 1,
+      "type": 4,
+      "key": "thalassian_scout_armor_kit"
+    },
+    {
+      "id": 8161,
+      "quality": 2,
+      "type": 4,
+      "key": "thalassian_scout_armor_kit"
+    },
+    {
+      "id": 18,
+      "quality": 0,
+      "type": 4,
+      "key": "thick_armor_kit"
+    },
+    {
+      "id": 6536,
+      "quality": 1,
+      "type": 4,
+      "key": "vibrant_spellthread"
+    },
+    {
+      "id": 6537,
+      "quality": 2,
+      "type": 4,
+      "key": "vibrant_spellthread"
+    },
+    {
+      "id": 6538,
+      "quality": 3,
+      "type": 4,
+      "key": "vibrant_spellthread"
+    },
+    {
+      "id": 2793,
+      "quality": 0,
+      "type": 4,
+      "key": "vindicators_armor_kit"
+    },
+    {
+      "id": 7535,
+      "quality": 1,
+      "type": 4,
+      "key": "weavercloth_spellthread"
+    },
+    {
+      "id": 7536,
+      "quality": 2,
+      "type": 4,
+      "key": "weavercloth_spellthread"
+    },
+    {
+      "id": 7537,
+      "quality": 3,
+      "type": 4,
+      "key": "weavercloth_spellthread"
+    }
+  ]
+}

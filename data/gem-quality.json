@@ -1,0 +1,50 @@
+{
+  "source": "manual-rules",
+  "rules": [
+    {
+      "label": "primary-with-tertiary",
+      "quality": "accepted",
+      "match": {
+        "textIncludes": "23 Primary / +0.15%"
+      }
+    },
+    {
+      "label": "primary",
+      "quality": "accepted",
+      "match": {
+        "textIncludes": "32 Primary"
+      }
+    },
+    {
+      "label": "secondary-mastery",
+      "quality": "accepted",
+      "match": {
+        "regex": "\\b16\\s+(mastery|mast)\\b"
+      }
+    },
+    {
+      "label": "secondary-haste",
+      "quality": "accepted",
+      "match": {
+        "regex": "\\b16\\s+haste\\b"
+      }
+    },
+    {
+      "label": "secondary-critical",
+      "quality": "accepted",
+      "match": {
+        "regex": "\\b16\\s+(critical|crit)\\b"
+      }
+    },
+    {
+      "label": "secondary-versatility",
+      "quality": "accepted",
+      "match": {
+        "regex": "\\b16\\s+(versatility|vers)\\b"
+      }
+    }
+  ],
+  "default": {
+    "quality": "rejected"
+  }
+}

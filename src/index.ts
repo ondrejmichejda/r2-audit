@@ -75,8 +75,10 @@ type EquipmentSlot = {
   label: string;
 };
 
-type SortKey = "name" | "realm" | "class" | "itemLevel";
+type SortKey = "name" | "realm" | "class" | "itemLevel" | "issueCount";
 type SortDirection = "asc" | "desc";
+type QuickFilter = "all" | "issues";
+type ViewMode = "full" | "issueItems";
 type TrackName = "Explorer" | "Adventurer" | "Veteran" | "Champion" | "Hero" | "Myth";
 type TrackInfo = {
   track: TrackName;
@@ -310,8 +312,10 @@ const state = {
   gemRules: [] as GemQualityRule[],
   search: "",
   realm: "all",
-  sortKey: "name" as SortKey,
-  sortDirection: "asc" as SortDirection,
+  quickFilter: "all" as QuickFilter,
+  viewMode: "full" as ViewMode,
+  sortKey: "issueCount" as SortKey,
+  sortDirection: "desc" as SortDirection,
   selectedItem: undefined as SelectedItem | undefined,
 };
 
@@ -327,6 +331,15 @@ const getRealmOptions = () =>
   Array.from(new Set(getPlayers().map((player) => player.realm))).sort((a, b) =>
     formatRealm(a).localeCompare(formatRealm(b)),
   );
+
+const isIssueFocused = () => state.viewMode === "issueItems" || state.quickFilter === "issues";
+
+const enforceIssueSort = () => {
+  if (isIssueFocused()) {
+    state.sortKey = "issueCount";
+    state.sortDirection = "desc";
+  }
+};
 
 const escapeHtml = (value: unknown) =>
   String(value ?? "")
@@ -428,8 +441,35 @@ const getStatusLabel = (record: PlayerRecord) => {
   return "Queued";
 };
 
+const itemHasIssue = (slot: EquipmentSlot, item?: RaiderItem) => {
+  if (!item) {
+    return false;
+  }
+
+  const tags = getItemTags(item);
+  const hasEnchantIssue = enchantableSlots.has(slot.key) && (!tags.enchantText || !tags.enchantQuality || tags.enchantQuality < 2);
+  const hasGemIssue = gemSlots.has(slot.key) && (!tags.gemText || !tags.isAcceptedGem);
+
+  return hasEnchantIssue || hasGemIssue;
+};
+
+const recordHasIssue = (record: PlayerRecord) => {
+  if (record.status === "error") {
+    return true;
+  }
+
+  return equipmentSlots.some((slot) => itemHasIssue(slot, record.data?.gear?.items?.[slot.key]));
+};
+
+const getIssueSlots = (record: PlayerRecord) =>
+  equipmentSlots.filter((slot) => itemHasIssue(slot, record.data?.gear?.items?.[slot.key]));
+
+const getIssueCount = (record: PlayerRecord) => (record.status === "error" ? 1 : getIssueSlots(record).length);
+
 const getSortValue = (record: PlayerRecord) => {
   switch (state.sortKey) {
+    case "issueCount":
+      return getIssueCount(record);
     case "realm":
       return getCharacterRealm(record);
     case "class":
@@ -443,6 +483,7 @@ const getSortValue = (record: PlayerRecord) => {
 };
 
 const getFilteredRecords = () => {
+  enforceIssueSort();
   const query = state.search.trim().toLowerCase();
 
   return [...state.records]
@@ -470,8 +511,9 @@ const getFilteredRecords = () => {
         .toLowerCase();
       const matchesSearch = searchable.includes(query);
       const matchesRealm = state.realm === "all" || record.player.realm === state.realm;
+      const matchesQuickFilter = state.quickFilter === "all" || recordHasIssue(record);
 
-      return matchesSearch && matchesRealm;
+      return matchesSearch && matchesRealm && matchesQuickFilter;
     })
     .sort((a, b) => {
       const valueA = getSortValue(a);
@@ -674,8 +716,90 @@ const renderRecordRow = (record: PlayerRecord) => {
   `;
 };
 
+const renderIssueRow = (record: PlayerRecord, slot: EquipmentSlot) => {
+  const characterName = getCharacterName(record);
+
+  return `
+    <tr>
+      <td>
+        <div class="player-cell">
+          ${
+            record.data?.thumbnail_url
+              ? `<img class="avatar avatar--image" src="${escapeHtml(record.data.thumbnail_url)}" alt="" />`
+              : `<span class="avatar" aria-hidden="true">${escapeHtml(getInitials(characterName))}</span>`
+          }
+          <div>
+            <a class="armory-link" href="${escapeHtml(record.player.blizzardUrl)}" target="_blank" rel="noreferrer">${escapeHtml(characterName)}</a>
+            <span>${escapeHtml([record.data?.active_spec_name, record.data?.class].filter(Boolean).join(" ") || getStatusLabel(record))}</span>
+          </div>
+        </div>
+      </td>
+      <td>
+        <strong>${escapeHtml(getCharacterRealm(record))}</strong>
+        <span>${escapeHtml(record.data?.faction ?? record.error ?? getStatusLabel(record))}</span>
+      </td>
+      <td><strong>${getIssueCount(record)}</strong></td>
+      <td><strong>${escapeHtml(slot.label)}</strong></td>
+      ${renderSlotCell(record, slot)}
+    </tr>
+  `;
+};
+
+const renderFullTable = (filteredRecords: PlayerRecord[]) => `
+  <div class="table-scroll">
+    <table class="gear-table">
+      <thead>
+        <tr>
+          ${renderSortableHeader("name", "Player", "sticky-cell sticky-cell--player")}
+          ${renderSortableHeader("realm", "Realm", "sticky-cell sticky-cell--realm")}
+          ${renderSortableHeader("itemLevel", "Ilvl")}
+          ${equipmentSlots.map((slot) => `<th>${escapeHtml(slot.label)}</th>`).join("")}
+        </tr>
+      </thead>
+      <tbody>
+        ${
+          filteredRecords.length
+            ? filteredRecords.map(renderRecordRow).join("")
+            : `<tr><td class="empty-state" colspan="${equipmentSlots.length + 3}">No characters match the current filters.</td></tr>`
+        }
+      </tbody>
+    </table>
+  </div>
+`;
+
+const renderIssueItemsTable = (filteredRecords: PlayerRecord[]) => {
+  const issueRows = filteredRecords.reduce<string[]>((rows, record) => {
+    rows.push(...getIssueSlots(record).map((slot) => renderIssueRow(record, slot)));
+    return rows;
+  }, []);
+
+  return `
+    <div class="table-scroll">
+      <table class="issue-table">
+        <thead>
+          <tr>
+            ${renderSortableHeader("name", "Player")}
+            ${renderSortableHeader("realm", "Realm")}
+            ${renderSortableHeader("issueCount", "Issues")}
+            <th>Slot</th>
+            <th>Issue item</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${
+            issueRows.length
+              ? issueRows.join("")
+              : `<tr><td class="empty-state" colspan="5">No issue items match the current filters.</td></tr>`
+          }
+        </tbody>
+      </table>
+    </div>
+  `;
+};
+
 const render = () => {
   const filteredRecords = getFilteredRecords();
+  const visibleRecords = state.viewMode === "issueItems" ? filteredRecords.filter(recordHasIssue) : filteredRecords;
   const players = getPlayers();
   const realmOptions = getRealmOptions();
   const loadedCount = state.records.filter((record) => record.status === "loaded").length;
@@ -694,7 +818,7 @@ const render = () => {
         </div>
         <div class="masthead__content">
           <p class="eyebrow">World of Warcraft roster</p>
-          <h1 id="page-title">Gear Audit</h1>
+          <h1 id="page-title">Ondreikovo gear audit</h1>
           <p class="summary">Loading Raider.IO gear data for ${players.length} listed EU characters and comparing locally mapped tracks, enchant ranks, and gems by equipment slot.</p>
         </div>
         <dl class="stats" aria-label="Roster summary">
@@ -714,6 +838,14 @@ const render = () => {
       </section>
 
       <section class="toolbar" aria-label="Table filters">
+        <div class="view-modes" aria-label="Views">
+          <button class="view-mode ${state.viewMode === "full" ? "view-mode--active" : ""}" type="button" data-view-mode="full">Full audit</button>
+          <button class="view-mode ${state.viewMode === "issueItems" ? "view-mode--active" : ""}" type="button" data-view-mode="issueItems">Issue items</button>
+        </div>
+        <div class="quick-filters" aria-label="Quick filters">
+          <button class="quick-filter ${state.quickFilter === "all" ? "quick-filter--active" : ""}" type="button" data-quick-filter="all">All</button>
+          <button class="quick-filter quick-filter--issues ${state.quickFilter === "issues" ? "quick-filter--active" : ""}" type="button" data-quick-filter="issues">Show issues</button>
+        </div>
         <label class="field">
           <span>Search</span>
           <input id="search" type="search" value="${escapeHtml(state.search)}" placeholder="Name, realm, class, item" autocomplete="off" />
@@ -736,29 +868,11 @@ const render = () => {
         <div class="table-header">
           <div>
             <h2 id="table-title">Equipment Slots</h2>
-            <p>${filteredRecords.length} ${filteredRecords.length === 1 ? "result" : "results"} · ${loadingCount} loading</p>
+            <p>${visibleRecords.length} ${visibleRecords.length === 1 ? "result" : "results"} · ${loadingCount} loading</p>
           </div>
           <button class="refresh-button" id="refresh" type="button">Refresh</button>
         </div>
-        <div class="table-scroll">
-          <table class="gear-table">
-            <thead>
-              <tr>
-                ${renderSortableHeader("name", "Player", "sticky-cell sticky-cell--player")}
-                ${renderSortableHeader("realm", "Realm", "sticky-cell sticky-cell--realm")}
-                ${renderSortableHeader("itemLevel", "Ilvl")}
-                ${equipmentSlots.map((slot) => `<th>${escapeHtml(slot.label)}</th>`).join("")}
-              </tr>
-            </thead>
-            <tbody>
-              ${
-                filteredRecords.length
-                  ? filteredRecords.map(renderRecordRow).join("")
-                  : `<tr><td class="empty-state" colspan="${equipmentSlots.length + 3}">No characters match the current filters.</td></tr>`
-              }
-            </tbody>
-          </table>
-        </div>
+        ${state.viewMode === "issueItems" ? renderIssueItemsTable(visibleRecords) : renderFullTable(visibleRecords)}
       </section>
       ${renderItemModal()}
     </main>
@@ -790,6 +904,22 @@ const bindEvents = () => {
     render();
   });
 
+  document.querySelectorAll<HTMLButtonElement>("[data-quick-filter]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.quickFilter = button.dataset.quickFilter as QuickFilter;
+      enforceIssueSort();
+      render();
+    });
+  });
+
+  document.querySelectorAll<HTMLButtonElement>("[data-view-mode]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.viewMode = button.dataset.viewMode as ViewMode;
+      enforceIssueSort();
+      render();
+    });
+  });
+
   document.querySelector<HTMLButtonElement>("#refresh")?.addEventListener("click", () => {
     loadRaiderData();
   });
@@ -815,13 +945,19 @@ const bindEvents = () => {
 
   document.querySelectorAll<HTMLButtonElement>("[data-sort]").forEach((button) => {
     button.addEventListener("click", () => {
+      if (isIssueFocused()) {
+        enforceIssueSort();
+        render();
+        return;
+      }
+
       const nextSortKey = button.dataset.sort as SortKey;
 
       if (state.sortKey === nextSortKey) {
         state.sortDirection = state.sortDirection === "asc" ? "desc" : "asc";
       } else {
         state.sortKey = nextSortKey;
-        state.sortDirection = nextSortKey === "itemLevel" ? "desc" : "asc";
+        state.sortDirection = nextSortKey === "itemLevel" || nextSortKey === "issueCount" ? "desc" : "asc";
       }
 
       render();

@@ -8,7 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-const appVersion = "20260422112838";
+const appVersion = "20260422200930";
 const equipmentSlots = [
     { key: "head", label: "Head" },
     { key: "neck", label: "Neck" },
@@ -226,7 +226,6 @@ const state = {
     gemRules: [],
     search: "",
     realm: "all",
-    quickFilter: "all",
     viewMode: "full",
     sortKey: "issueCount",
     sortDirection: "desc",
@@ -238,7 +237,7 @@ const formatRealm = (realm) => realm
     .join(" ");
 const getPlayers = () => state.records.map((record) => record.player);
 const getRealmOptions = () => Array.from(new Set(getPlayers().map((player) => player.realm))).sort((a, b) => formatRealm(a).localeCompare(formatRealm(b)));
-const isIssueFocused = () => state.viewMode === "issueItems" || state.quickFilter === "issues";
+const isIssueFocused = () => state.viewMode === "issueItems";
 const enforceIssueSort = () => {
     if (isIssueFocused()) {
         state.sortKey = "issueCount";
@@ -253,18 +252,6 @@ const escapeHtml = (value) => String(value !== null && value !== void 0 ? value 
     .replace(/'/g, "&#039;");
 const formatNumber = (value, digits = 0) => typeof value === "number" && Number.isFinite(value) ? value.toFixed(digits) : "n/a";
 const getSearchQuery = () => state.search.trim().toLowerCase();
-const textMatchesSearch = (...values) => {
-    const query = getSearchQuery();
-    if (!query) {
-        return true;
-    }
-    return values
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase()
-        .includes(query);
-};
-const getSearchDimClass = (matches) => (getSearchQuery() && !matches ? " search-dimmed" : "");
 const normalizeItemName = (name) => name.toLowerCase().replace(/\s+/g, " ").trim();
 const normalizeEnchantKey = (name) => normalizeItemName(name)
     .replace(/'/g, "")
@@ -435,8 +422,8 @@ const getFilteredRecords = () => {
             .toLowerCase();
         const matchesSearch = searchable.includes(query);
         const matchesRealm = state.realm === "all" || record.player.realm === state.realm;
-        const matchesQuickFilter = state.quickFilter === "all" || recordHasIssue(record);
-        return matchesSearch && matchesRealm && matchesQuickFilter;
+        const matchesViewMode = state.viewMode !== "issueItems" || recordHasIssue(record);
+        return matchesSearch && matchesRealm && matchesViewMode;
     })
         .sort((a, b) => {
         const valueA = getSortValue(a);
@@ -519,19 +506,19 @@ const getItemTags = (item) => {
         isAcceptedGem: isAcceptedGem(gemText),
     };
 };
-const renderSlotCell = (record, slot) => {
-    var _a, _b, _c, _d, _e, _f;
+const renderSlotCell = (record, slot, options = {}) => {
+    var _a, _b, _c, _d;
     const item = (_c = (_b = (_a = record.data) === null || _a === void 0 ? void 0 : _a.gear) === null || _b === void 0 ? void 0 : _b.items) === null || _c === void 0 ? void 0 : _c[slot.key];
-    const slotMatchesSearch = textMatchesSearch(slot.label, item === null || item === void 0 ? void 0 : item.name, item === null || item === void 0 ? void 0 : item.item_level, (_d = item === null || item === void 0 ? void 0 : item.enchants_detail) === null || _d === void 0 ? void 0 : _d.map((enchant) => enchant.name).join(" "), (_e = item === null || item === void 0 ? void 0 : item.gems_detail) === null || _e === void 0 ? void 0 : _e.map((gem) => gem.name).join(" "));
-    const slotClass = `slot-cell${getSearchDimClass(slotMatchesSearch)}`;
+    const slotClass = `slot-cell${options.showSlotLabel ? " issue-item-cell" : ""}`;
+    const slotLabel = options.showSlotLabel ? `<span class="slot-label">${escapeHtml(slot.label)}</span>` : "";
     if (record.status === "loading" || record.status === "idle") {
-        return `<td class="${slotClass}"><span class="muted">Loading</span></td>`;
+        return `<td class="${slotClass}">${slotLabel}<span class="muted">Loading</span></td>`;
     }
     if (record.status === "error") {
-        return `<td class="${slotClass}"><span class="error-text">${escapeHtml(record.error)}</span></td>`;
+        return `<td class="${slotClass}">${slotLabel}<span class="error-text">${escapeHtml(record.error)}</span></td>`;
     }
     if (!item) {
-        return `<td class="${slotClass}"><span class="muted">Empty</span></td>`;
+        return `<td class="${slotClass}">${slotLabel}<span class="muted">Empty</span></td>`;
     }
     const tags = getItemTags(item);
     const canHaveEnchant = canCheckEnchant(record, slot);
@@ -540,8 +527,9 @@ const renderSlotCell = (record, slot) => {
     const trackText = formatTrack(track) || getAmbiguousTrackText(item);
     return `
     <td class="${slotClass}">
+      ${slotLabel}
       <button class="item-button" type="button" data-item-key="${escapeHtml(getItemKey(record.player.name, slot.key))}">
-        <strong class="${track ? `item-name item-name--${track.track.toLowerCase()}` : "item-name"}">${escapeHtml((_f = item.name) !== null && _f !== void 0 ? _f : "Unknown item")}</strong>
+        <strong class="${track ? `item-name item-name--${track.track.toLowerCase()}` : "item-name"}">${escapeHtml((_d = item.name) !== null && _d !== void 0 ? _d : "Unknown item")}</strong>
       </button>
       <span class="item-level">ilvl ${formatNumber(item.item_level)}</span>
       <div class="item-tags">
@@ -578,55 +566,51 @@ const renderItemModal = () => {
   `;
 };
 const renderRecordRow = (record) => {
-    var _a, _b, _c, _d, _e, _f, _g;
+    var _a, _b, _c, _d;
     const characterName = getCharacterName(record);
     const thumbnail = (_a = record.data) === null || _a === void 0 ? void 0 : _a.thumbnail_url;
-    const playerMatchesSearch = textMatchesSearch(characterName, record.player.name, getCharacterRealm(record), (_b = record.data) === null || _b === void 0 ? void 0 : _b.faction, (_c = record.data) === null || _c === void 0 ? void 0 : _c.active_spec_name, (_d = record.data) === null || _d === void 0 ? void 0 : _d.class);
-    const issueMatchesSearch = textMatchesSearch(getIssueCount(record), "issues");
     return `
     <tr>
-      <td class="sticky-cell sticky-cell--player${getSearchDimClass(playerMatchesSearch)}">
+      <td class="sticky-cell sticky-cell--player">
         <div class="player-cell">
           ${thumbnail
         ? `<img class="avatar avatar--image" src="${escapeHtml(thumbnail)}" alt="" />`
         : `<span class="avatar" aria-hidden="true">${escapeHtml(getInitials(characterName))}</span>`}
           <div>
             <a class="armory-link" href="${escapeHtml(record.player.blizzardUrl)}" target="_blank" rel="noreferrer">${escapeHtml(characterName)}</a>
-            <span>${escapeHtml([(_e = record.data) === null || _e === void 0 ? void 0 : _e.active_spec_name, (_f = record.data) === null || _f === void 0 ? void 0 : _f.class].filter(Boolean).join(" ") || getStatusLabel(record))}</span>
-            <span>${escapeHtml([getCharacterRealm(record), (_g = record.data) === null || _g === void 0 ? void 0 : _g.faction].filter(Boolean).join(" · "))}</span>
+            <span>${escapeHtml([(_b = record.data) === null || _b === void 0 ? void 0 : _b.active_spec_name, (_c = record.data) === null || _c === void 0 ? void 0 : _c.class].filter(Boolean).join(" ") || getStatusLabel(record))}</span>
+            <span>${escapeHtml([getCharacterRealm(record), (_d = record.data) === null || _d === void 0 ? void 0 : _d.faction].filter(Boolean).join(" · "))}</span>
           </div>
         </div>
       </td>
-      <td class="${getSearchDimClass(issueMatchesSearch)}">
+      <td>
         <strong>${getIssueCount(record)}</strong>
       </td>
       ${equipmentSlots.map((slot) => renderSlotCell(record, slot)).join("")}
     </tr>
   `;
 };
-const renderIssueRow = (record, slot) => {
-    var _a, _b, _c, _d, _e, _f, _g;
+const renderIssueRow = (record) => {
+    var _a, _b, _c, _d;
     const characterName = getCharacterName(record);
-    const playerMatchesSearch = textMatchesSearch(characterName, record.player.name, getCharacterRealm(record), (_a = record.data) === null || _a === void 0 ? void 0 : _a.faction, (_b = record.data) === null || _b === void 0 ? void 0 : _b.active_spec_name, (_c = record.data) === null || _c === void 0 ? void 0 : _c.class);
-    const issueMatchesSearch = textMatchesSearch(getIssueCount(record), "issues");
-    const slotMatchesSearch = textMatchesSearch(slot.label);
+    const issueSlots = getIssueSlots(record);
     return `
     <tr>
-      <td class="${getSearchDimClass(playerMatchesSearch)}">
+      <td>
         <div class="player-cell">
-          ${((_d = record.data) === null || _d === void 0 ? void 0 : _d.thumbnail_url)
+          ${((_a = record.data) === null || _a === void 0 ? void 0 : _a.thumbnail_url)
         ? `<img class="avatar avatar--image" src="${escapeHtml(record.data.thumbnail_url)}" alt="" />`
         : `<span class="avatar" aria-hidden="true">${escapeHtml(getInitials(characterName))}</span>`}
           <div>
             <a class="armory-link" href="${escapeHtml(record.player.blizzardUrl)}" target="_blank" rel="noreferrer">${escapeHtml(characterName)}</a>
-            <span>${escapeHtml([(_e = record.data) === null || _e === void 0 ? void 0 : _e.active_spec_name, (_f = record.data) === null || _f === void 0 ? void 0 : _f.class].filter(Boolean).join(" ") || getStatusLabel(record))}</span>
-            <span>${escapeHtml([getCharacterRealm(record), (_g = record.data) === null || _g === void 0 ? void 0 : _g.faction].filter(Boolean).join(" · "))}</span>
+            <span>${escapeHtml([(_b = record.data) === null || _b === void 0 ? void 0 : _b.active_spec_name, (_c = record.data) === null || _c === void 0 ? void 0 : _c.class].filter(Boolean).join(" ") || getStatusLabel(record))}</span>
+            <span>${escapeHtml([getCharacterRealm(record), (_d = record.data) === null || _d === void 0 ? void 0 : _d.faction].filter(Boolean).join(" · "))}</span>
           </div>
         </div>
       </td>
-      <td class="${getSearchDimClass(issueMatchesSearch)}"><strong>${getIssueCount(record)}</strong></td>
-      <td class="${getSearchDimClass(slotMatchesSearch)}"><strong>${escapeHtml(slot.label)}</strong></td>
-      ${renderSlotCell(record, slot)}
+      ${record.status === "error"
+        ? `<td class="slot-cell issue-item-cell"><span class="slot-label">Load error</span><span class="error-text">${escapeHtml(record.error)}</span></td>`
+        : issueSlots.map((slot) => renderSlotCell(record, slot, { showSlotLabel: true })).join("")}
     </tr>
   `;
 };
@@ -649,25 +633,14 @@ const renderFullTable = (filteredRecords) => `
   </div>
 `;
 const renderIssueItemsTable = (filteredRecords) => {
-    const issueRows = filteredRecords.reduce((rows, record) => {
-        rows.push(...getIssueSlots(record).map((slot) => renderIssueRow(record, slot)));
-        return rows;
-    }, []);
+    const issueRecords = filteredRecords.filter(recordHasIssue);
     return `
     <div class="table-scroll">
       <table class="issue-table">
-        <thead>
-          <tr>
-            ${renderSortableHeader("name", "Player")}
-            ${renderSortableHeader("issueCount", "Issues")}
-            <th>Slot</th>
-            <th>Issue item</th>
-          </tr>
-        </thead>
         <tbody>
-          ${issueRows.length
-        ? issueRows.join("")
-        : `<tr><td class="empty-state" colspan="4">No issue items match the current filters.</td></tr>`}
+          ${issueRecords.length
+        ? issueRecords.map(renderIssueRow).join("")
+        : `<tr><td class="empty-state">No issue items match the current filters.</td></tr>`}
         </tbody>
       </table>
     </div>
@@ -675,7 +648,7 @@ const renderIssueItemsTable = (filteredRecords) => {
 };
 const render = () => {
     const filteredRecords = getFilteredRecords();
-    const visibleRecords = state.viewMode === "issueItems" ? filteredRecords.filter(recordHasIssue) : filteredRecords;
+    const visibleRecords = filteredRecords;
     const players = getPlayers();
     const realmOptions = getRealmOptions();
     const loadedCount = state.records.filter((record) => record.status === "loaded").length;
@@ -717,10 +690,6 @@ const render = () => {
         <div class="view-modes" aria-label="Views">
           <button class="view-mode ${state.viewMode === "full" ? "view-mode--active" : ""}" type="button" data-view-mode="full">Full audit</button>
           <button class="view-mode ${state.viewMode === "issueItems" ? "view-mode--active" : ""}" type="button" data-view-mode="issueItems">Issue items</button>
-        </div>
-        <div class="quick-filters" aria-label="Quick filters">
-          <button class="quick-filter ${state.quickFilter === "all" ? "quick-filter--active" : ""}" type="button" data-quick-filter="all">All</button>
-          <button class="quick-filter quick-filter--issues ${state.quickFilter === "issues" ? "quick-filter--active" : ""}" type="button" data-quick-filter="issues">Show issues</button>
         </div>
         <label class="field">
           <span>Search</span>
@@ -772,13 +741,6 @@ const bindEvents = () => {
     (_b = document.querySelector("#realm")) === null || _b === void 0 ? void 0 : _b.addEventListener("change", (event) => {
         state.realm = event.currentTarget.value;
         render();
-    });
-    document.querySelectorAll("[data-quick-filter]").forEach((button) => {
-        button.addEventListener("click", () => {
-            state.quickFilter = button.dataset.quickFilter;
-            enforceIssueSort();
-            render();
-        });
     });
     document.querySelectorAll("[data-view-mode]").forEach((button) => {
         button.addEventListener("click", () => {

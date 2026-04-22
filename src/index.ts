@@ -77,7 +77,6 @@ type EquipmentSlot = {
 
 type SortKey = "name" | "realm" | "class" | "issueCount";
 type SortDirection = "asc" | "desc";
-type QuickFilter = "all" | "issues";
 type ViewMode = "full" | "issueItems";
 type TrackName = "Explorer" | "Adventurer" | "Veteran" | "Champion" | "Hero" | "Myth";
 type TrackInfo = {
@@ -87,7 +86,7 @@ type TrackInfo = {
   source: "bonus" | "item-level";
 };
 
-const appVersion = "20260422112838";
+const appVersion = "20260422200930";
 
 const equipmentSlots: EquipmentSlot[] = [
   { key: "head", label: "Head" },
@@ -314,7 +313,6 @@ const state = {
   gemRules: [] as GemQualityRule[],
   search: "",
   realm: "all",
-  quickFilter: "all" as QuickFilter,
   viewMode: "full" as ViewMode,
   sortKey: "issueCount" as SortKey,
   sortDirection: "desc" as SortDirection,
@@ -334,7 +332,7 @@ const getRealmOptions = () =>
     formatRealm(a).localeCompare(formatRealm(b)),
   );
 
-const isIssueFocused = () => state.viewMode === "issueItems" || state.quickFilter === "issues";
+const isIssueFocused = () => state.viewMode === "issueItems";
 
 const enforceIssueSort = () => {
   if (isIssueFocused()) {
@@ -355,22 +353,6 @@ const formatNumber = (value: unknown, digits = 0) =>
   typeof value === "number" && Number.isFinite(value) ? value.toFixed(digits) : "n/a";
 
 const getSearchQuery = () => state.search.trim().toLowerCase();
-
-const textMatchesSearch = (...values: unknown[]) => {
-  const query = getSearchQuery();
-
-  if (!query) {
-    return true;
-  }
-
-  return values
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase()
-    .includes(query);
-};
-
-const getSearchDimClass = (matches: boolean) => (getSearchQuery() && !matches ? " search-dimmed" : "");
 
 const normalizeItemName = (name: string) => name.toLowerCase().replace(/\s+/g, " ").trim();
 
@@ -585,9 +567,9 @@ const getFilteredRecords = () => {
         .toLowerCase();
       const matchesSearch = searchable.includes(query);
       const matchesRealm = state.realm === "all" || record.player.realm === state.realm;
-      const matchesQuickFilter = state.quickFilter === "all" || recordHasIssue(record);
+      const matchesViewMode = state.viewMode !== "issueItems" || recordHasIssue(record);
 
-      return matchesSearch && matchesRealm && matchesQuickFilter;
+      return matchesSearch && matchesRealm && matchesViewMode;
     })
     .sort((a, b) => {
       const valueA = getSortValue(a);
@@ -691,27 +673,21 @@ const getItemTags = (item: RaiderItem) => {
   };
 };
 
-const renderSlotCell = (record: PlayerRecord, slot: EquipmentSlot) => {
+const renderSlotCell = (record: PlayerRecord, slot: EquipmentSlot, options: { showSlotLabel?: boolean } = {}) => {
   const item = record.data?.gear?.items?.[slot.key];
-  const slotMatchesSearch = textMatchesSearch(
-    slot.label,
-    item?.name,
-    item?.item_level,
-    item?.enchants_detail?.map((enchant) => enchant.name).join(" "),
-    item?.gems_detail?.map((gem) => gem.name).join(" "),
-  );
-  const slotClass = `slot-cell${getSearchDimClass(slotMatchesSearch)}`;
+  const slotClass = `slot-cell${options.showSlotLabel ? " issue-item-cell" : ""}`;
+  const slotLabel = options.showSlotLabel ? `<span class="slot-label">${escapeHtml(slot.label)}</span>` : "";
 
   if (record.status === "loading" || record.status === "idle") {
-    return `<td class="${slotClass}"><span class="muted">Loading</span></td>`;
+    return `<td class="${slotClass}">${slotLabel}<span class="muted">Loading</span></td>`;
   }
 
   if (record.status === "error") {
-    return `<td class="${slotClass}"><span class="error-text">${escapeHtml(record.error)}</span></td>`;
+    return `<td class="${slotClass}">${slotLabel}<span class="error-text">${escapeHtml(record.error)}</span></td>`;
   }
 
   if (!item) {
-    return `<td class="${slotClass}"><span class="muted">Empty</span></td>`;
+    return `<td class="${slotClass}">${slotLabel}<span class="muted">Empty</span></td>`;
   }
 
   const tags = getItemTags(item);
@@ -722,6 +698,7 @@ const renderSlotCell = (record: PlayerRecord, slot: EquipmentSlot) => {
 
   return `
     <td class="${slotClass}">
+      ${slotLabel}
       <button class="item-button" type="button" data-item-key="${escapeHtml(getItemKey(record.player.name, slot.key))}">
         <strong class="${track ? `item-name item-name--${track.track.toLowerCase()}` : "item-name"}">${escapeHtml(item.name ?? "Unknown item")}</strong>
       </button>
@@ -769,19 +746,10 @@ const renderItemModal = () => {
 const renderRecordRow = (record: PlayerRecord) => {
   const characterName = getCharacterName(record);
   const thumbnail = record.data?.thumbnail_url;
-  const playerMatchesSearch = textMatchesSearch(
-    characterName,
-    record.player.name,
-    getCharacterRealm(record),
-    record.data?.faction,
-    record.data?.active_spec_name,
-    record.data?.class,
-  );
-  const issueMatchesSearch = textMatchesSearch(getIssueCount(record), "issues");
 
   return `
     <tr>
-      <td class="sticky-cell sticky-cell--player${getSearchDimClass(playerMatchesSearch)}">
+      <td class="sticky-cell sticky-cell--player">
         <div class="player-cell">
           ${
             thumbnail
@@ -795,7 +763,7 @@ const renderRecordRow = (record: PlayerRecord) => {
           </div>
         </div>
       </td>
-      <td class="${getSearchDimClass(issueMatchesSearch)}">
+      <td>
         <strong>${getIssueCount(record)}</strong>
       </td>
       ${equipmentSlots.map((slot) => renderSlotCell(record, slot)).join("")}
@@ -803,22 +771,13 @@ const renderRecordRow = (record: PlayerRecord) => {
   `;
 };
 
-const renderIssueRow = (record: PlayerRecord, slot: EquipmentSlot) => {
+const renderIssueRow = (record: PlayerRecord) => {
   const characterName = getCharacterName(record);
-  const playerMatchesSearch = textMatchesSearch(
-    characterName,
-    record.player.name,
-    getCharacterRealm(record),
-    record.data?.faction,
-    record.data?.active_spec_name,
-    record.data?.class,
-  );
-  const issueMatchesSearch = textMatchesSearch(getIssueCount(record), "issues");
-  const slotMatchesSearch = textMatchesSearch(slot.label);
+  const issueSlots = getIssueSlots(record);
 
   return `
     <tr>
-      <td class="${getSearchDimClass(playerMatchesSearch)}">
+      <td>
         <div class="player-cell">
           ${
             record.data?.thumbnail_url
@@ -832,9 +791,11 @@ const renderIssueRow = (record: PlayerRecord, slot: EquipmentSlot) => {
           </div>
         </div>
       </td>
-      <td class="${getSearchDimClass(issueMatchesSearch)}"><strong>${getIssueCount(record)}</strong></td>
-      <td class="${getSearchDimClass(slotMatchesSearch)}"><strong>${escapeHtml(slot.label)}</strong></td>
-      ${renderSlotCell(record, slot)}
+      ${
+        record.status === "error"
+          ? `<td class="slot-cell issue-item-cell"><span class="slot-label">Load error</span><span class="error-text">${escapeHtml(record.error)}</span></td>`
+          : issueSlots.map((slot) => renderSlotCell(record, slot, { showSlotLabel: true })).join("")
+      }
     </tr>
   `;
 };
@@ -861,27 +822,16 @@ const renderFullTable = (filteredRecords: PlayerRecord[]) => `
 `;
 
 const renderIssueItemsTable = (filteredRecords: PlayerRecord[]) => {
-  const issueRows = filteredRecords.reduce<string[]>((rows, record) => {
-    rows.push(...getIssueSlots(record).map((slot) => renderIssueRow(record, slot)));
-    return rows;
-  }, []);
+  const issueRecords = filteredRecords.filter(recordHasIssue);
 
   return `
     <div class="table-scroll">
       <table class="issue-table">
-        <thead>
-          <tr>
-            ${renderSortableHeader("name", "Player")}
-            ${renderSortableHeader("issueCount", "Issues")}
-            <th>Slot</th>
-            <th>Issue item</th>
-          </tr>
-        </thead>
         <tbody>
           ${
-            issueRows.length
-              ? issueRows.join("")
-              : `<tr><td class="empty-state" colspan="4">No issue items match the current filters.</td></tr>`
+            issueRecords.length
+              ? issueRecords.map(renderIssueRow).join("")
+              : `<tr><td class="empty-state">No issue items match the current filters.</td></tr>`
           }
         </tbody>
       </table>
@@ -891,7 +841,7 @@ const renderIssueItemsTable = (filteredRecords: PlayerRecord[]) => {
 
 const render = () => {
   const filteredRecords = getFilteredRecords();
-  const visibleRecords = state.viewMode === "issueItems" ? filteredRecords.filter(recordHasIssue) : filteredRecords;
+  const visibleRecords = filteredRecords;
   const players = getPlayers();
   const realmOptions = getRealmOptions();
   const loadedCount = state.records.filter((record) => record.status === "loaded").length;
@@ -933,10 +883,6 @@ const render = () => {
         <div class="view-modes" aria-label="Views">
           <button class="view-mode ${state.viewMode === "full" ? "view-mode--active" : ""}" type="button" data-view-mode="full">Full audit</button>
           <button class="view-mode ${state.viewMode === "issueItems" ? "view-mode--active" : ""}" type="button" data-view-mode="issueItems">Issue items</button>
-        </div>
-        <div class="quick-filters" aria-label="Quick filters">
-          <button class="quick-filter ${state.quickFilter === "all" ? "quick-filter--active" : ""}" type="button" data-quick-filter="all">All</button>
-          <button class="quick-filter quick-filter--issues ${state.quickFilter === "issues" ? "quick-filter--active" : ""}" type="button" data-quick-filter="issues">Show issues</button>
         </div>
         <label class="field">
           <span>Search</span>
@@ -994,14 +940,6 @@ const bindEvents = () => {
   document.querySelector<HTMLSelectElement>("#realm")?.addEventListener("change", (event) => {
     state.realm = (event.currentTarget as HTMLSelectElement).value;
     render();
-  });
-
-  document.querySelectorAll<HTMLButtonElement>("[data-quick-filter]").forEach((button) => {
-    button.addEventListener("click", () => {
-      state.quickFilter = button.dataset.quickFilter as QuickFilter;
-      enforceIssueSort();
-      render();
-    });
   });
 
   document.querySelectorAll<HTMLButtonElement>("[data-view-mode]").forEach((button) => {

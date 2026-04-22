@@ -354,6 +354,24 @@ const escapeHtml = (value: unknown) =>
 const formatNumber = (value: unknown, digits = 0) =>
   typeof value === "number" && Number.isFinite(value) ? value.toFixed(digits) : "n/a";
 
+const getSearchQuery = () => state.search.trim().toLowerCase();
+
+const textMatchesSearch = (...values: unknown[]) => {
+  const query = getSearchQuery();
+
+  if (!query) {
+    return true;
+  }
+
+  return values
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase()
+    .includes(query);
+};
+
+const getSearchDimClass = (matches: boolean) => (getSearchQuery() && !matches ? " search-dimmed" : "");
+
 const normalizeItemName = (name: string) => name.toLowerCase().replace(/\s+/g, " ").trim();
 
 const normalizeEnchantKey = (name: string) =>
@@ -364,6 +382,20 @@ const normalizeEnchantKey = (name: string) =>
     .replace(/^_+|_+$/g, "");
 
 const formatQuality = (quality?: number) => (quality ? `Q${quality}` : "");
+
+const renderPreservingTableScroll = () => {
+  const tableScroll = document.querySelector<HTMLDivElement>(".table-scroll");
+  const scrollLeft = tableScroll?.scrollLeft ?? 0;
+  const scrollTop = tableScroll?.scrollTop ?? 0;
+
+  render();
+
+  const nextTableScroll = document.querySelector<HTMLDivElement>(".table-scroll");
+  if (nextTableScroll) {
+    nextTableScroll.scrollLeft = scrollLeft;
+    nextTableScroll.scrollTop = scrollTop;
+  }
+};
 
 const getItemKey = (playerName: string, slotKey: string) => `${playerName}::${slotKey}`;
 
@@ -626,17 +658,25 @@ const getItemTags = (item: RaiderItem) => {
 
 const renderSlotCell = (record: PlayerRecord, slot: EquipmentSlot) => {
   const item = record.data?.gear?.items?.[slot.key];
+  const slotMatchesSearch = textMatchesSearch(
+    slot.label,
+    item?.name,
+    item?.item_level,
+    item?.enchants_detail?.map((enchant) => enchant.name).join(" "),
+    item?.gems_detail?.map((gem) => gem.name).join(" "),
+  );
+  const slotClass = `slot-cell${getSearchDimClass(slotMatchesSearch)}`;
 
   if (record.status === "loading" || record.status === "idle") {
-    return `<td class="slot-cell"><span class="muted">Loading</span></td>`;
+    return `<td class="${slotClass}"><span class="muted">Loading</span></td>`;
   }
 
   if (record.status === "error") {
-    return `<td class="slot-cell"><span class="error-text">${escapeHtml(record.error)}</span></td>`;
+    return `<td class="${slotClass}"><span class="error-text">${escapeHtml(record.error)}</span></td>`;
   }
 
   if (!item) {
-    return `<td class="slot-cell"><span class="muted">Empty</span></td>`;
+    return `<td class="${slotClass}"><span class="muted">Empty</span></td>`;
   }
 
   const tags = getItemTags(item);
@@ -646,7 +686,7 @@ const renderSlotCell = (record: PlayerRecord, slot: EquipmentSlot) => {
   const trackText = formatTrack(track) || getAmbiguousTrackText(item);
 
   return `
-    <td class="slot-cell">
+    <td class="${slotClass}">
       <button class="item-button" type="button" data-item-key="${escapeHtml(getItemKey(record.player.name, slot.key))}">
         <strong class="${track ? `item-name item-name--${track.track.toLowerCase()}` : "item-name"}">${escapeHtml(item.name ?? "Unknown item")}</strong>
       </button>
@@ -694,10 +734,19 @@ const renderItemModal = () => {
 const renderRecordRow = (record: PlayerRecord) => {
   const characterName = getCharacterName(record);
   const thumbnail = record.data?.thumbnail_url;
+  const playerMatchesSearch = textMatchesSearch(
+    characterName,
+    record.player.name,
+    getCharacterRealm(record),
+    record.data?.faction,
+    record.data?.active_spec_name,
+    record.data?.class,
+  );
+  const issueMatchesSearch = textMatchesSearch(getIssueCount(record), "issues");
 
   return `
     <tr>
-      <td class="sticky-cell sticky-cell--player">
+      <td class="sticky-cell sticky-cell--player${getSearchDimClass(playerMatchesSearch)}">
         <div class="player-cell">
           ${
             thumbnail
@@ -711,7 +760,7 @@ const renderRecordRow = (record: PlayerRecord) => {
           </div>
         </div>
       </td>
-      <td>
+      <td class="${getSearchDimClass(issueMatchesSearch)}">
         <strong>${getIssueCount(record)}</strong>
       </td>
       ${equipmentSlots.map((slot) => renderSlotCell(record, slot)).join("")}
@@ -721,10 +770,20 @@ const renderRecordRow = (record: PlayerRecord) => {
 
 const renderIssueRow = (record: PlayerRecord, slot: EquipmentSlot) => {
   const characterName = getCharacterName(record);
+  const playerMatchesSearch = textMatchesSearch(
+    characterName,
+    record.player.name,
+    getCharacterRealm(record),
+    record.data?.faction,
+    record.data?.active_spec_name,
+    record.data?.class,
+  );
+  const issueMatchesSearch = textMatchesSearch(getIssueCount(record), "issues");
+  const slotMatchesSearch = textMatchesSearch(slot.label);
 
   return `
     <tr>
-      <td>
+      <td class="${getSearchDimClass(playerMatchesSearch)}">
         <div class="player-cell">
           ${
             record.data?.thumbnail_url
@@ -738,8 +797,8 @@ const renderIssueRow = (record: PlayerRecord, slot: EquipmentSlot) => {
           </div>
         </div>
       </td>
-      <td><strong>${getIssueCount(record)}</strong></td>
-      <td><strong>${escapeHtml(slot.label)}</strong></td>
+      <td class="${getSearchDimClass(issueMatchesSearch)}"><strong>${getIssueCount(record)}</strong></td>
+      <td class="${getSearchDimClass(slotMatchesSearch)}"><strong>${escapeHtml(slot.label)}</strong></td>
       ${renderSlotCell(record, slot)}
     </tr>
   `;
@@ -926,7 +985,7 @@ const bindEvents = () => {
     button.addEventListener("click", () => {
       const itemKey = button.dataset.itemKey;
       state.selectedItem = itemKey ? getSelectedItemByKey(itemKey) : undefined;
-      render();
+      renderPreservingTableScroll();
     });
   });
 
@@ -937,7 +996,7 @@ const bindEvents = () => {
       }
 
       state.selectedItem = undefined;
-      render();
+      renderPreservingTableScroll();
     });
   });
 
@@ -966,7 +1025,7 @@ const bindEvents = () => {
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && state.selectedItem) {
     state.selectedItem = undefined;
-    render();
+    renderPreservingTableScroll();
   }
 });
 

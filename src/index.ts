@@ -87,7 +87,7 @@ type TrackInfo = {
   source: "bonus" | "item-level";
 };
 
-const appVersion = "20260422-1";
+const appVersion = "20260422112838";
 
 const equipmentSlots: EquipmentSlot[] = [
   { key: "head", label: "Head" },
@@ -382,6 +382,41 @@ const normalizeEnchantKey = (name: string) =>
     .replace(/^_+|_+$/g, "");
 
 const formatQuality = (quality?: number) => (quality ? `Q${quality}` : "");
+
+const reloadForVersion = (version: string) => {
+  const reloadKey = `r2-audit-version-reload-${version}`;
+
+  if (sessionStorage.getItem(reloadKey)) {
+    return;
+  }
+
+  sessionStorage.setItem(reloadKey, "true");
+
+  const nextUrl = new URL(window.location.href);
+  nextUrl.searchParams.set("v", version);
+  window.location.replace(nextUrl.toString());
+};
+
+const checkForNewVersion = async () => {
+  try {
+    const response = await fetch(`data/version.json?v=${Date.now()}`, { cache: "no-store" });
+
+    if (!response.ok) {
+      return false;
+    }
+
+    const data = (await response.json()) as { version?: string };
+
+    if (data.version && data.version !== appVersion) {
+      reloadForVersion(data.version);
+      return true;
+    }
+  } catch {
+    return false;
+  }
+
+  return false;
+};
 
 const renderPreservingTableScroll = () => {
   const tableScroll = document.querySelector<HTMLDivElement>(".table-scroll");
@@ -1076,6 +1111,10 @@ const loadRaiderData = async () => {
 
 const start = async () => {
   try {
+    if (await checkForNewVersion()) {
+      return;
+    }
+
     await Promise.all([loadPlayers(), loadGemQualityRules()]);
     render();
     loadRaiderData();

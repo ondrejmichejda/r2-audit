@@ -8,7 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-const appVersion = "20260422-1";
+const appVersion = "20260422112838";
 const equipmentSlots = [
     { key: "head", label: "Head" },
     { key: "neck", label: "Neck" },
@@ -272,6 +272,33 @@ const normalizeEnchantKey = (name) => normalizeItemName(name)
     .replace(/[^a-z0-9]+/g, "_")
     .replace(/^_+|_+$/g, "");
 const formatQuality = (quality) => (quality ? `Q${quality}` : "");
+const reloadForVersion = (version) => {
+    const reloadKey = `r2-audit-version-reload-${version}`;
+    if (sessionStorage.getItem(reloadKey)) {
+        return;
+    }
+    sessionStorage.setItem(reloadKey, "true");
+    const nextUrl = new URL(window.location.href);
+    nextUrl.searchParams.set("v", version);
+    window.location.replace(nextUrl.toString());
+};
+const checkForNewVersion = () => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const response = yield fetch(`data/version.json?v=${Date.now()}`, { cache: "no-store" });
+        if (!response.ok) {
+            return false;
+        }
+        const data = (yield response.json());
+        if (data.version && data.version !== appVersion) {
+            reloadForVersion(data.version);
+            return true;
+        }
+    }
+    catch (_a) {
+        return false;
+    }
+    return false;
+});
 const renderPreservingTableScroll = () => {
     var _a, _b;
     const tableScroll = document.querySelector(".table-scroll");
@@ -842,6 +869,9 @@ const loadRaiderData = () => __awaiter(void 0, void 0, void 0, function* () {
 });
 const start = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        if (yield checkForNewVersion()) {
+            return;
+        }
         yield Promise.all([loadPlayers(), loadGemQualityRules()]);
         render();
         loadRaiderData();

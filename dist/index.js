@@ -8,6 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+const appVersion = "20260422-1";
 const equipmentSlots = [
     { key: "head", label: "Head" },
     { key: "neck", label: "Neck" },
@@ -272,7 +273,7 @@ const normalizePlayer = (player) => {
     };
 };
 const loadPlayers = () => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield fetch("data/players.json");
+    const response = yield fetch(`data/players.json?v=${appVersion}`, { cache: "no-store" });
     if (!response.ok) {
         throw new Error(`Could not load data/players.json: HTTP ${response.status}`);
     }
@@ -283,7 +284,7 @@ const loadPlayers = () => __awaiter(void 0, void 0, void 0, function* () {
     }));
 });
 const loadGemQualityRules = () => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield fetch("data/gem-quality.json");
+    const response = yield fetch(`data/gem-quality.json?v=${appVersion}`, { cache: "no-store" });
     if (!response.ok) {
         throw new Error(`Could not load data/gem-quality.json: HTTP ${response.status}`);
     }

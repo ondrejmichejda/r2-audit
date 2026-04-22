@@ -87,6 +87,8 @@ type TrackInfo = {
   source: "bonus" | "item-level";
 };
 
+const appVersion = "20260422-1";
+
 const equipmentSlots: EquipmentSlot[] = [
   { key: "head", label: "Head" },
   { key: "neck", label: "Neck" },
@@ -379,7 +381,7 @@ const normalizePlayer = (player: PlayerJson): Player => {
 };
 
 const loadPlayers = async () => {
-  const response = await fetch("data/players.json");
+  const response = await fetch(`data/players.json?v=${appVersion}`, { cache: "no-store" });
 
   if (!response.ok) {
     throw new Error(`Could not load data/players.json: HTTP ${response.status}`);
@@ -394,7 +396,7 @@ const loadPlayers = async () => {
 };
 
 const loadGemQualityRules = async () => {
-  const response = await fetch("data/gem-quality.json");
+  const response = await fetch(`data/gem-quality.json?v=${appVersion}`, { cache: "no-store" });
 
   if (!response.ok) {
     throw new Error(`Could not load data/gem-quality.json: HTTP ${response.status}`);
